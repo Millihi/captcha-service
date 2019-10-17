@@ -1,0 +1,49 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ "THE CAKE-WARE LICENSE" (Revision 42):                                   ~
+  ~                                                                          ~
+  ~     Milfie <mail@milfie.uu.me> wrote this file. As long as you retain    ~
+  ~ this notice you can do whatever you want with this stuff. If we meet     ~
+  ~ some day, and you think this stuff is worth it, you must buy me a cake   ~
+  ~ in return.                                                               ~
+  ~                                                                          ~
+  ~     Milfie.                                                              ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+   <f:loadBundle
+      var="MDMS"
+      basename="projects.milfie.captcha.i18n.MenuMessageBundle" />
+
+   <h:panelGrid columns="1"
+                columnClasses="center"
+                styleClass="menu component-form"
+                captionClass="component-form-caption">
+
+      <f:facet name="caption">#{MDMS['ui.module.caption']}</f:facet>
+
+      <h:form>
+         <h:panelGrid columns="2"
+                      columnClasses="fullwidth, nonewidth"
+                      styleClass="component-form-grid">
+
+            <c:forEach items="#{menuControllerBean.items}" var="item">
+               <c:if test="#{item.isEnabled (menuControllerBean)}">
+                  <h:commandButton
+                     value="#{MDMS['ui.item.' += item.key += '.name']}"
+                     action="#{item.view (menuControllerBean)}" />
+                  <h:outputText
+                     value="#{item.isActive (menuControllerBean) ? '>' : ' '}" />
+               </c:if>
+            </c:forEach>
+
+         </h:panelGrid>
+      </h:form>
+
+   </h:panelGrid>
+
+</ui:composition>

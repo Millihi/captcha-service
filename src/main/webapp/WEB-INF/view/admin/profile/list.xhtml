@@ -1,0 +1,71 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ "THE CAKE-WARE LICENSE" (Revision 42):                                   ~
+  ~                                                                          ~
+  ~     Milfie <mail@milfie.uu.me> wrote this file. As long as you retain    ~
+  ~ this notice you can do whatever you want with this stuff. If we meet     ~
+  ~ some day, and you think this stuff is worth it, you must buy me a cake   ~
+  ~ in return.                                                               ~
+  ~                                                                          ~
+  ~     Milfie.                                                              ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+   <h:form>
+      <h:panelGrid columns="1"
+                   columnClasses="left"
+                   styleClass="component-form"
+                   captionClass="component-form-caption">
+
+         <f:facet name="caption">
+            <h:outputFormat value="#{lcms['ui.list.caption']}">
+               <f:param value="#{bean.clientName}" />
+            </h:outputFormat>
+         </f:facet>
+
+         <h:messages layout="table"
+                     styleClass="center"
+                     errorClass="error-message"
+                     globalOnly="true"
+                     showDetail="false"
+                     showSummary="true" />
+
+         <h:outputText rendered="#{empty bean.profiles}"
+                       value="#{lcms['ui.list.empty']}" />
+
+         <h:commandButton
+            value="#{gbms['ui.button.add']}"
+            action="#{bean.create}" />
+
+         <h:dataTable rendered="#{not empty bean.profiles}"
+                      value="#{bean.profiles}" var="profile"
+                      styleClass="component-list-grid">
+
+            <f:facet name="colgroups">
+               <h:panelGroup>
+                  <col />
+                  <col class="thirdwidth" />
+               </h:panelGroup>
+            </f:facet>
+
+            <h:column>
+               <f:facet name="header">#{lcms['ui.list.name']}</f:facet>
+               <h:outputText value="#{profile.name}" />
+            </h:column>
+
+            <h:column>
+               <f:facet name="header">#{lcms['ui.list.actions']}</f:facet>
+               <h:commandButton
+                  value="#{gbms['ui.button.view']}"
+                  action="#{bean.view (profile)}" />
+            </h:column>
+
+         </h:dataTable>
+
+      </h:panelGrid>
+   </h:form>
+
+</ui:composition>

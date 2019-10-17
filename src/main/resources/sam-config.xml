@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ "THE CAKE-WARE LICENSE" (Revision 42):                                   ~
+  ~                                                                          ~
+  ~     Milfie <mail@milfie.uu.me> wrote this file. As long as you retain    ~
+  ~ this notice you can do whatever you want with this stuff. If we meet     ~
+  ~ some day, and you think this stuff is worth it, you must buy me a cake   ~
+  ~ in return.                                                               ~
+  ~                                                                          ~
+  ~     Milfie.                                                              ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+   <comment>JASPIC Server Auth Module config</comment>
+   <entry key = "excludedFromAuthResources">/puzzle</entry>
+   <entry key = "basicAuthEnabled">true</entry>
+   <entry key = "basicAuthResources">/CaptchaClientService</entry>
+   <entry key = "formAuthEnabled">true</entry>
+   <entry key = "formAuthResources">/</entry>
+   <entry key = "formAuthLoginPage">/login.xhtml</entry>
+   <entry key = "formAuthErrorPage">/login.xhtml</entry>
+   <entry key = "formAuthAction">login.xhtml</entry>
+</properties>

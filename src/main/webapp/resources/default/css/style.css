@@ -1,0 +1,226 @@
+/*****************************************************************************
+ *  "THE CAKE-WARE LICENSE" (Revision 41):                                   *
+ *                                                                           *
+ *      Milfeulle <mail@milfie.uu.me> wrote this file. As long as you        *
+ *  retain this notice you can do whatever you want with this stuff. If we   *
+ *  meet some day, and you think this stuff is worth it, you can buy me      *
+ *  a cake in return.                                                        *
+ *                                                                           *
+ *      Milfie                                                               *
+ *****************************************************************************/
+
+* {
+   box-sizing: border-box;
+   margin:     0;
+   padding:    0;
+   position:   relative;
+}
+HTML,
+BODY {
+   background-color: ivory;
+   font-size:        12pt;
+   overflow:         hidden;
+}
+BODY {
+   padding: 2.5pt 5pt;
+}
+
+TABLE {
+   border:          0 solid black;
+   border-collapse: collapse;
+}
+TH, TD {
+   vertical-align: middle;
+}
+TH {
+   text-align: center;
+}
+TD {
+   text-align: left;
+}
+INPUT {
+   padding: 1pt 2.5pt;
+}
+INPUT[type=submit] {
+   padding: 1pt 10pt;
+}
+
+/* Generic */
+.left, TR.left > TD {
+   text-align: left;
+}
+.center, TR.center > TD {
+   text-align: center;
+}
+.right, TR.right > TD {
+   text-align: right;
+}
+.nonewidth, TR.nonewidth > TD {
+   width:       1%;
+   white-space: nowrap;
+}
+.thirdwidth, TR.thirdwidth > TD {
+   width:       33%;
+   white-space: nowrap;
+}
+.quartwidth, TR.quartwidth > TD {
+   width:       25%;
+   white-space: nowrap;
+}
+.halfwidth, TR.halfwidth > TD {
+   width:       50%;
+   white-space: nowrap;
+}
+.fullwidth, TR.fullwidth > TD {
+   width: 99%;
+}
+
+/* Main layout */
+.main {
+   border:   0;
+   position: fixed;
+   top:      0;
+   bottom:   0;
+   left:     0;
+   right:    0;
+   width:    100%;
+   height:   100%;
+}
+.main-header,
+.main-footer {
+   height:         1%;
+   text-align:     center;
+   vertical-align: middle;
+   z-index:        1;
+}
+.main-left,
+.main-center,
+.main-right {
+   padding:        10pt 5pt;
+   overflow-y:     auto;
+   text-align:     center;
+   vertical-align: top;
+   z-index:        1;
+}
+.main-left,
+.main-right {
+   width: 22.5%;
+}
+.main-left {
+   padding-left: 10pt;
+}
+.main-right {
+   padding-right: 10pt;
+}
+.row {
+   font-size:        125%;
+   font-weight:      bold;
+   padding:          6pt 20pt;
+   border:           1.5pt solid lightsalmon;
+   background-color: lightpink;
+}
+.column {
+   overflow-y: auto;
+}
+
+/* Error messages */
+.error-message, TR.error-message > TD {
+   background-color: lemonchiffon;
+   color:            red;
+   display:          block;
+}
+
+/* Form table */
+.component-form {
+   border:           1.5pt solid lightsalmon;
+   background-color: lavenderblush;
+   text-align:       center;
+   width:            100%;
+}
+.component-form-caption {
+   display:          block;
+   border:           0;
+   border-bottom:    1.5pt solid lightsalmon;
+   background-color: lightpink;
+   text-align:       center;
+   font-size:        100%;
+   font-weight:      bold;
+   white-space:      nowrap;
+}
+.component-form-caption,
+.component-form TH,
+.component-form TD {
+   padding: 2.5pt 5pt;
+}
+
+/* Grid table */
+.component-form-grid {
+   border-width: 0;
+   width:        100%;
+}
+.component-form-grid TH,
+.component-form-grid TD {
+   padding: 2.5pt 5pt;
+}
+
+/* List table */
+.component-list-grid {
+   background-color: mintcream;
+   width:            100%;
+   table-layout:     fixed;
+}
+.component-list-grid TH,
+.component-list-grid TD {
+   border:        0;
+   padding:       2.5pt 5pt;
+   overflow:      hidden;
+   text-overflow: ellipsis;
+}
+.component-list-grid TH {
+   background-color: paleturquoise;
+}
+.component-list-grid TR + TR {
+   border-top: 1.5pt solid paleturquoise;
+}
+.component-list-grid TH + TH,
+.component-list-grid TD + TD {
+   border-left: 1.5pt solid paleturquoise;
+}
+
+/* Message table */
+.component-messages {
+   width: 100%;
+}
+.component-messages TH,
+.component-messages TD {
+   text-align: center;
+   padding:    2.5pt 5pt;
+}
+
+/* Welcome form */
+.welcome-form {
+   text-align: center;
+}
+
+/* Login form */
+.login-form INPUT[type=submit] {
+   width: 33%;
+}
+
+.login-form-actions {
+   text-align: center;
+}
+
+/* Menu layout */
+.menu .fullwidth > * {
+   width: 99%;
+}
+
+/* Header util panel */
+.header-buttons {
+   text-align: right;
+   z-index:    1;
+}
+.header-buttons > * {
+   margin: 0 2.5pt;
+}

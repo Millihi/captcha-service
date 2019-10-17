@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ "THE CAKE-WARE LICENSE" (Revision 42):                                   ~
+  ~                                                                          ~
+  ~     Milfie <mail@milfie.uu.me> wrote this file. As long as you retain    ~
+  ~ this notice you can do whatever you want with this stuff. If we meet     ~
+  ~ some day, and you think this stuff is worth it, you must buy me a cake   ~
+  ~ in return.                                                               ~
+  ~                                                                          ~
+  ~     Milfie.                                                              ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<project xmlns = "http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation = "
+            http://maven.apache.org/POM/4.0.0
+            http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+   <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~  Globals                                                             ~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+   <modelVersion>4.0.0</modelVersion>
+
+   <groupId>projects.milfie</groupId>
+   <artifactId>Captcha_Service</artifactId>
+   <version>1.0-SNAPSHOT</version>
+   <packaging>war</packaging>
+
+   <name>Captcha service application</name>
+   <url>http://localhost:8080/</url>
+
+   <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~  Properties                                                          ~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+   <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <maven.compiler.source>1.8</maven.compiler.source>
+      <maven.compiler.target>1.8</maven.compiler.target>
+      <builtin.datasource.begin>&lt;!-- ON --&gt;</builtin.datasource.begin>
+      <builtin.datasource.end>&lt;!-- ON --&gt;</builtin.datasource.end>
+      <config.type>default</config.type>
+      <app.config.default>application.default.properties</app.config.default>
+      <app.config>application.${config.type}.properties</app.config>
+      <app.project.stage>Development</app.project.stage>
+      <build.profiles.exclusive>
+         Development, Production
+      </build.profiles.exclusive>
+   </properties>
+
+   <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~  Profiles                                                            ~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+   <profiles>
+      <profile>
+         <id>Development</id>
+         <properties>
+            <config.type>dev</config.type>
+            <app.project.stage>Development</app.project.stage>
+         </properties>
+      </profile>
+
+      <profile>
+         <id>Production</id>
+         <properties>
+            <config.type>prod</config.type>
+            <app.project.stage>Production</app.project.stage>
+         </properties>
+      </profile>
+
+      <profile>
+         <id>ExternalDS</id>
+         <properties>
+            <builtin.datasource.begin>&lt;!-- OFF</builtin.datasource.begin>
+            <builtin.datasource.end>OFF --&gt;</builtin.datasource.end>
+         </properties>
+      </profile>
+   </profiles>
+
+   <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~  Dependencies                                                        ~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+   <dependencies>
+      <!-- JUnit -->
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <version>4.11</version>
+         <scope>test</scope>
+      </dependency>
+
+      <!-- JavaEE 7 API -->
+      <dependency>
+         <groupId>javax</groupId>
+         <artifactId>javaee-api</artifactId>
+         <version>7.0</version>
+         <scope>provided</scope>
+      </dependency>
+
+      <!-- Database -->
+      <dependency>
+         <groupId>org.apache.derby</groupId>
+         <artifactId>derbyclient</artifactId>
+         <version>10.12.1.1</version>
+         <scope>provided</scope>
+      </dependency>
+   </dependencies>
+
+   <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~  Build                                                               ~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+   <build>
+      <finalName>captcha</finalName>
+
+      <filters>
+         <filter>${app.config}</filter>
+      </filters>
+
+      <resources>
+         <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+         </resource>
+      </resources>
+
+      <plugins>
+         <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          ~~  Load build properties                                         ~~
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+         <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>properties-maven-plugin</artifactId>
+            <version>1.0.0</version>
+
+            <executions>
+               <execution>
+                  <phase>initialize</phase>
+                  <goals>
+                     <goal>read-project-properties</goal>
+                  </goals>
+                  <configuration>
+                     <files>
+                        <file>${app.config.default}</file>
+                        <file>${app.config}</file>
+                     </files>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+
+         <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          ~~  Check whether selected build profiles are correct.            ~~
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>3.0.0-M2</version>
+
+            <executions>
+               <execution>
+                  <id>enforce-initial-verification</id>
+                  <goals>
+                     <goal>enforce</goal>
+                  </goals>
+                  <configuration>
+                     <rules>
+                        <evaluateBeanshell>
+                           <condition>
+                              <![CDATA[
+                              String data = "${project.activeProfiles}";
+                              String[] list = "${build.profiles.exclusive}"
+                                 .split ("\\s*,+\\s*");
+                              int count = 0;
+
+                              for (String prof : list) {
+                                 if (data.indexOf ("id: " + prof + ",") >= 0) {
+                                    ++count;
+                                 }
+                              }
+
+                              return (count == 1);
+                           ]]>
+                           </condition>
+                           <message>
+                              Incorrect build mode. You must specify one of this profiles: ${build.profiles.exclusive}.
+                           </message>
+                        </evaluateBeanshell>
+                        <requireFilesExist>
+                           <files>
+                              <file>${project.basedir}/${app.config}</file>
+                           </files>
+                           <message>
+                              The application config file ${app.config} was not found in the project root.
+                           </message>
+                        </requireFilesExist>
+                     </rules>
+                     <fail>true</fail>
+                     <failFast>true</failFast>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+
+         <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          ~~ Strict compiling.                                              ~~
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+         <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.0</version>
+            <configuration>
+               <compilerArgument>-Xlint:all</compilerArgument>
+               <showWarnings>true</showWarnings>
+               <showDeprecation>true</showDeprecation>
+               <optimize>true</optimize>
+            </configuration>
+         </plugin>
+
+         <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          ~~ Useful console output.                                         ~~
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+         <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0-M3</version>
+            <configuration>
+               <reportFormat>plain</reportFormat>
+            </configuration>
+         </plugin>
+
+         <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          ~~ Filter deployment descriptors of WAR.                          ~~
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-war-plugin</artifactId>
+            <version>3.2.3</version>
+
+            <configuration>
+               <filters>
+                  <filter>${app.config}</filter>
+               </filters>
+               <filteringDeploymentDescriptors>
+                  true
+               </filteringDeploymentDescriptors>
+            </configuration>
+         </plugin>
+      </plugins>
+   </build>
+</project>

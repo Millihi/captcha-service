@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ "THE CAKE-WARE LICENSE" (Revision 42):                                   ~
+  ~                                                                          ~
+  ~     Milfie <mail@milfie.uu.me> wrote this file. As long as you retain    ~
+  ~ this notice you can do whatever you want with this stuff. If we meet     ~
+  ~ some day, and you think this stuff is worth it, you must buy me a cake   ~
+  ~ in return.                                                               ~
+  ~                                                                          ~
+  ~     Milfie.                                                              ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<jboss-web version="10.0"
+           xmlns="http://www.jboss.com/xml/ns/javaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="
+              http://www.jboss.com/xml/ns/javaee
+              http://www.jboss.org/j2ee/schema/jboss-web_10_0.xsd">
+
+   <security-domain>jaspitest</security-domain>
+
+</jboss-web>

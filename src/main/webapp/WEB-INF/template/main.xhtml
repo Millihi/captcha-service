@@ -1,0 +1,82 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ "THE CAKE-WARE LICENSE" (Revision 42):                                   ~
+  ~                                                                          ~
+  ~     Milfie <mail@milfie.uu.me> wrote this file. As long as you retain    ~
+  ~ this notice you can do whatever you want with this stuff. If we meet     ~
+  ~ some day, and you think this stuff is worth it, you must buy me a cake   ~
+  ~ in return.                                                               ~
+  ~                                                                          ~
+  ~     Milfie.                                                              ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html lang="#{localeKeeperBean.language}"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<f:view locale="#{localeKeeperBean.locale}">
+
+   <ui:insert name="metadata" />
+
+   <h:head>
+
+      <title><ui:insert name="title" /></title>
+
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+      <h:outputStylesheet library="default" name="css/style.css" />
+
+      <ui:insert name="headdata" />
+
+   </h:head>
+
+   <h:body>
+
+      <table class="main">
+         <thead>
+         <tr>
+            <td colspan="3" class="main-header">
+               <div class="row">
+                  <ui:insert name="header" />
+               </div>
+            </td>
+         </tr>
+         </thead>
+
+         <tbody>
+         <tr>
+            <td class="main-left">
+               <div class="column"><ui:insert name="left" /></div>
+            </td>
+            <td class="main-center">
+               <div class="column"><ui:insert name="center" /></div>
+            </td>
+            <td class="main-right">
+               <div class="column">
+                  <ui:include src="/WEB-INF/template/util-panel.xhtml" />
+                  <ui:insert name="right" />
+               </div>
+            </td>
+         </tr>
+         </tbody>
+
+         <tfoot>
+         <tr>
+            <td colspan="3" class="main-footer">
+               <div class="row">
+                  <ui:insert name="footer" />
+               </div>
+            </td>
+         </tr>
+         </tfoot>
+      </table>
+
+   </h:body>
+
+</f:view>
+
+</html>

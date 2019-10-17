@@ -1,0 +1,46 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ "THE CAKE-WARE LICENSE" (Revision 42):                                   ~
+  ~                                                                          ~
+  ~     Milfie <mail@milfie.uu.me> wrote this file. As long as you retain    ~
+  ~ this notice you can do whatever you want with this stuff. If we meet     ~
+  ~ some day, and you think this stuff is worth it, you must buy me a cake   ~
+  ~ in return.                                                               ~
+  ~                                                                          ~
+  ~     Milfie.                                                              ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<ui:composition template="/WEB-INF/template/main.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+   <ui:define name="metadata">
+      <f:loadBundle
+         var="lcms"
+         basename="projects.milfie.captcha.i18n.WelcomeMessageBundle" />
+   </ui:define>
+
+   <ui:define name="title">
+      #{gbms['ui.title.appName']} ::
+      #{lcms['ui.title.module']}
+   </ui:define>
+
+   <ui:define name="header">
+      #{gbms['ui.title.appName']} ::
+      #{lcms['ui.title.module']}
+   </ui:define>
+
+   <ui:define name="center">
+      <h:form styleClass="welcome-form">
+         <h1>#{lcms['ui.welcome.caption']}</h1>
+
+         <h2>#{lcms['ui.welcome.label']}</h2>
+
+         <h:commandButton
+            value="#{lcms['ui.welcome.button.enter']}"
+            action="login?faces-redirect=true" />
+      </h:form>
+   </ui:define>
+
+</ui:composition>

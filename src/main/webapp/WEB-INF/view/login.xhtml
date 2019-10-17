@@ -1,0 +1,65 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ "THE CAKE-WARE LICENSE" (Revision 42):                                   ~
+  ~                                                                          ~
+  ~     Milfie <mail@milfie.uu.me> wrote this file. As long as you retain    ~
+  ~ this notice you can do whatever you want with this stuff. If we meet     ~
+  ~ some day, and you think this stuff is worth it, you must buy me a cake   ~
+  ~ in return.                                                               ~
+  ~                                                                          ~
+  ~     Milfie.                                                              ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+   <h:panelGrid columns="1"
+                columnClasses="center"
+                styleClass="component-form"
+                captionClass="component-form-caption">
+
+      <f:facet name="caption">#{lcms['ui.auth.caption']}</f:facet>
+
+      <h:messages layout="table"
+                  styleClass="center"
+                  errorClass="error-message"
+                  globalOnly="true"
+                  showDetail="false"
+                  showSummary="true" />
+
+      <form method="post" action="login.xhtml" class="login-form">
+         <table class="component-form-grid">
+            <tr>
+               <td class="left">
+                  <label for="j_username">
+                     #{lcms['ui.auth.username']}
+                  </label>
+               </td>
+               <td>
+                  <input type="text"
+                         id="j_username" name="j_username" />
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <label for="j_password">
+                     #{lcms['ui.auth.password']}
+                  </label>
+               </td>
+               <td>
+                  <input type="password"
+                         id="j_password" name="j_password" />
+               </td>
+            </tr>
+            <tr>
+               <td colspan="2" class="login-form-actions">
+                  <input type="submit"
+                         value="#{lcms['ui.auth.button.login']}" />
+               </td>
+            </tr>
+         </table>
+      </form>
+   </h:panelGrid>
+
+</ui:composition>

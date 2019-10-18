@@ -81,10 +81,20 @@ public final class ServerAuthModuleImpl
                                       final Subject serviceSubject)
       throws AuthException
    {
-      final Method method = findEnabledMethod (messageInfo);
+      final Method method = Method.findEnabled (this, messageInfo);
 
-      algorithm.put (Algorithm.CHECK_IF_ATTEMPT_TO_AUTHORIZE, method.check);
-      algorithm.put (Algorithm.TRY_SEND_AUTH_CHALLENGE, method.send);
+      if (method == null) {
+         algorithm.put
+            (Algorithm.CHECK_IF_ATTEMPT_TO_AUTHORIZE, Action.DO_NOTHING);
+         algorithm.put
+            (Algorithm.TRY_SEND_AUTH_CHALLENGE, Action.DO_NOTHING);
+      }
+      else {
+         algorithm.put
+            (Algorithm.CHECK_IF_ATTEMPT_TO_AUTHORIZE, method.check);
+         algorithm.put
+            (Algorithm.TRY_SEND_AUTH_CHALLENGE, method.send);
+      }
 
       for (final Algorithm step : Algorithm.values ()) {
          final AuthStatus result =
@@ -131,15 +141,6 @@ public final class ServerAuthModuleImpl
 
    private final Configuration              config;
    private final EnumMap<Algorithm, Action> algorithm;
-
-   private Method findEnabledMethod (final MessageInfo messageInfo) {
-      for (final Method method : Method.values ()) {
-         if (method.isEnabled (this, messageInfo)) {
-            return method;
-         }
-      }
-      throw new IllegalStateException ("Unable to find any method enabled.");
-   }
 
    private AuthStatus tryOnAlreadyAuthorized (
       final MessageInfo messageInfo,
@@ -386,6 +387,18 @@ public final class ServerAuthModuleImpl
                return true;
             }
          };
+
+      public static Method findEnabled (final ServerAuthModuleImpl module,
+                                        final MessageInfo info)
+      {
+         for (final Method method : Method.values ()) {
+            if (method.isEnabled (module, info)) {
+               return method;
+            }
+         }
+
+         return null;
+      }
 
       /////////////////////////////////////////////////////////////////////////
       //  Public section                                                     //

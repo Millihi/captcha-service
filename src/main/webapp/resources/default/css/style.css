@@ -9,6 +9,10 @@
  *      Milfie                                                               *
  *****************************************************************************/
 
+/*****************************************************************************
+ *  Default                                                                  *
+ *****************************************************************************/
+
 * {
    box-sizing: border-box;
    margin:     0;
@@ -45,7 +49,10 @@ INPUT[type=submit] {
    padding: 1pt 10pt;
 }
 
-/* Generic */
+/*****************************************************************************
+ *  Generic                                                                  *
+ *****************************************************************************/
+
 .left, TR.left > TD {
    text-align: left;
 }
@@ -55,8 +62,23 @@ INPUT[type=submit] {
 .right, TR.right > TD {
    text-align: right;
 }
+
+.top, TR.top > TD {
+   vertical-align: top;
+}
+.middle, TR.middle > TD {
+   vertical-align: middle;
+}
+.bottom, TR.bottom > TD {
+   vertical-align: bottom;
+}
+
 .nonewidth, TR.nonewidth > TD {
    width:       1%;
+   white-space: nowrap;
+}
+.halfwidth, TR.halfwidth > TD {
+   width:       50%;
    white-space: nowrap;
 }
 .thirdwidth, TR.thirdwidth > TD {
@@ -67,15 +89,14 @@ INPUT[type=submit] {
    width:       25%;
    white-space: nowrap;
 }
-.halfwidth, TR.halfwidth > TD {
-   width:       50%;
-   white-space: nowrap;
-}
 .fullwidth, TR.fullwidth > TD {
    width: 99%;
 }
 
-/* Main layout */
+/*****************************************************************************
+ *  Main template                                                            *
+ *****************************************************************************/
+
 .main {
    border:   0;
    position: fixed;
@@ -123,21 +144,17 @@ INPUT[type=submit] {
    overflow-y: auto;
 }
 
-/* Error messages */
-.error-message, TR.error-message > TD {
-   background-color: lemonchiffon;
-   color:            red;
-   display:          block;
-}
+/*****************************************************************************
+ *  Form table                                                               *
+ *****************************************************************************/
 
-/* Form table */
-.component-form {
+TABLE.component-form {
    border:           1.5pt solid lightsalmon;
    background-color: lavenderblush;
    text-align:       center;
    width:            100%;
 }
-.component-form-caption {
+TABLE.component-form > CAPTION {
    display:          block;
    border:           0;
    border-bottom:    1.5pt solid lightsalmon;
@@ -147,62 +164,65 @@ INPUT[type=submit] {
    font-weight:      bold;
    white-space:      nowrap;
 }
-.component-form-caption,
-.component-form TH,
-.component-form TD {
+TABLE.component-form > CAPTION,
+TABLE.component-form > * > * > TH,
+TABLE.component-form > * > * > TD {
    padding: 2.5pt 5pt;
 }
 
-/* Grid table */
-.component-form-grid {
+/*****************************************************************************
+ *  Grid table                                                               *
+ *****************************************************************************/
+
+TABLE.component-form-grid {
    border-width: 0;
    width:        100%;
 }
-.component-form-grid TH,
-.component-form-grid TD {
+TABLE.component-form-grid > CAPTION,
+TABLE.component-form-grid > * > * > TH,
+TABLE.component-form-grid > * > * > TD {
    padding: 2.5pt 5pt;
 }
 
-/* List table */
-.component-list-grid {
+/*****************************************************************************
+ *  List table                                                               *
+ *****************************************************************************/
+
+TABLE.component-list-grid {
    background-color: mintcream;
    width:            100%;
    table-layout:     fixed;
 }
-.component-list-grid TH,
-.component-list-grid TD {
+TABLE.component-list-grid > * > * > TH,
+TABLE.component-list-grid > * > * > TD {
    border:        0;
    padding:       2.5pt 5pt;
    overflow:      hidden;
    text-overflow: ellipsis;
 }
-.component-list-grid TH {
+TABLE.component-list-grid > * > * > TH {
    background-color: paleturquoise;
 }
-.component-list-grid TR + TR {
+TABLE.component-list-grid > * > TR + TR {
    border-top: 1.5pt solid paleturquoise;
 }
-.component-list-grid TH + TH,
-.component-list-grid TD + TD {
+TABLE.component-list-grid > * > * > TH + TH,
+TABLE.component-list-grid > * > * > TD + TD {
    border-left: 1.5pt solid paleturquoise;
 }
 
-/* Message table */
-.component-messages {
-   width: 100%;
-}
-.component-messages TH,
-.component-messages TD {
-   text-align: center;
-   padding:    2.5pt 5pt;
-}
+/*****************************************************************************
+ *  Welcome form                                                             *
+ *****************************************************************************/
 
-/* Welcome form */
 .welcome-form {
    text-align: center;
 }
 
-/* Login form */
+/*****************************************************************************
+ *  Login form                                                               *
+ *****************************************************************************/
+
 .login-form INPUT[type=submit] {
    width: 33%;
 }
@@ -211,16 +231,45 @@ INPUT[type=submit] {
    text-align: center;
 }
 
-/* Menu layout */
+/*****************************************************************************
+ *  Menu layout                                                              *
+ *****************************************************************************/
+
 .menu .fullwidth > * {
    width: 99%;
 }
 
-/* Header util panel */
+/*****************************************************************************
+ *  Header util panel                                                        *
+ *****************************************************************************/
+
 .header-buttons {
    text-align: right;
    z-index:    1;
 }
 .header-buttons > * {
    margin: 0 2.5pt;
+}
+
+/*****************************************************************************
+ *  Message table                                                            *
+ *****************************************************************************/
+
+TABLE.component-messages {
+   width: 100%;
+}
+TABLE.component-messages > * > * > TH,
+TABLE.component-messages > * > * > TD {
+   text-align: center;
+   padding:    2.5pt 5pt;
+}
+
+/*****************************************************************************
+ *  Error messages                                                           *
+ *****************************************************************************/
+
+.error-message, TR.error-message > TD {
+   background-color: lemonchiffon;
+   color:            red;
+   display:          block;
 }

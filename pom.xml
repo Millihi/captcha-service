@@ -37,14 +37,24 @@
 
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
-      <builtin.datasource.begin>&lt;!-- ON --&gt;</builtin.datasource.begin>
-      <builtin.datasource.end>&lt;!-- ON --&gt;</builtin.datasource.end>
+
+      <marker.on.begin>&lt;!-- BEGIN ON --&gt;</marker.on.begin>
+      <marker.on.end>&lt;!-- END ON --&gt;</marker.on.end>
+      <marker.off.begin>&lt;!-- BEGIN OFF</marker.off.begin>
+      <marker.off.end>END OFF --&gt;</marker.off.end>
+
+      <builtin.datasource.begin>${marker.on.begin}</builtin.datasource.begin>
+      <builtin.datasource.end>${marker.on.end}</builtin.datasource.end>
+
       <config.type>default</config.type>
+
       <app.config.default>application.default.properties</app.config.default>
       <app.config>application.${config.type}.properties</app.config>
       <app.project.stage>Development</app.project.stage>
+
       <build.profiles.exclusive>
          Development, Production
       </build.profiles.exclusive>
@@ -59,7 +69,22 @@
          <id>Development</id>
          <properties>
             <config.type>dev</config.type>
+
             <app.project.stage>Development</app.project.stage>
+
+            <app.project.stage.development.begin>
+               ${marker.on.begin}
+            </app.project.stage.development.begin>
+            <app.project.stage.development.end>
+               ${marker.on.end}
+            </app.project.stage.development.end>
+
+            <app.project.stage.production.begin>
+               ${marker.off.begin}
+            </app.project.stage.production.begin>
+            <app.project.stage.production.end>
+               ${marker.off.end}
+            </app.project.stage.production.end>
          </properties>
       </profile>
 
@@ -67,15 +92,34 @@
          <id>Production</id>
          <properties>
             <config.type>prod</config.type>
+
             <app.project.stage>Production</app.project.stage>
+
+            <app.project.stage.development.begin>
+               ${marker.off.begin}
+            </app.project.stage.development.begin>
+            <app.project.stage.development.end>
+               ${marker.off.end}
+            </app.project.stage.development.end>
+
+            <app.project.stage.production.begin>
+               ${marker.on.begin}
+            </app.project.stage.production.begin>
+            <app.project.stage.production.end>
+               ${marker.on.end}
+            </app.project.stage.production.end>
          </properties>
       </profile>
 
       <profile>
          <id>ExternalDS</id>
          <properties>
-            <builtin.datasource.begin>&lt;!-- OFF</builtin.datasource.begin>
-            <builtin.datasource.end>OFF --&gt;</builtin.datasource.end>
+            <builtin.datasource.begin>
+               ${marker.off.begin}
+            </builtin.datasource.begin>
+            <builtin.datasource.end>
+               ${marker.off.end}
+            </builtin.datasource.end>
          </properties>
       </profile>
    </profiles>

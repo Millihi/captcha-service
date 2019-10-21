@@ -42,12 +42,21 @@
        <param-value>true</param-value>
    </context-param>
 
+   ${app.project.stage.development.begin}
    <context-param>
       <param-name>
          org.apache.myfaces.STRICT_JSF_2_FACELETS_COMPATIBILITY
       </param-name>
       <param-value>true</param-value>
    </context-param>
+   ${app.project.stage.development.end}
+
+   ${app.project.stage.production.begin}
+   <context-param>
+      <param-name>org.apache.myfaces.CACHE_EL_EXPRESSIONS</param-name>
+      <param-value>alwaysRecompile</param-value>
+   </context-param>
+   ${app.project.stage.production.end}
 
    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      ~  Filters                                                              ~

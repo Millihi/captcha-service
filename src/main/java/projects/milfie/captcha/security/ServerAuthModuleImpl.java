@@ -240,7 +240,7 @@ public final class ServerAuthModuleImpl
       final String loginURI =
          request.getContextPath () + config.getFormAuthLoginPage ();
 
-      request.getSession ().setAttribute
+      request.getSession (true).setAttribute
          (Configuration.SESSION_KEY_REDIRECT_TO, getRelativeURL (request));
 
       try {

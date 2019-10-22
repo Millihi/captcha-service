@@ -13,9 +13,9 @@ package projects.milfie.captcha.view.admin;
 
 import projects.milfie.captcha.i18n.LoginMessageBundle;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -24,13 +24,10 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import static projects.milfie.captcha.security.Configuration.ATTR_KEY_IS_POST_AUTH;
-import static projects.milfie.captcha.security.Configuration.SESSION_KEY_REDIRECT_TO;
-import static projects.milfie.captcha.view.admin.Configuration.INITIAL_VIEW;
-import static projects.milfie.captcha.view.admin.Configuration.WELCOME_VIEW;
+import static projects.milfie.captcha.security.Configuration.*;
+import static projects.milfie.captcha.view.admin.Configuration.*;
 
 @ViewScoped
 @ManagedBean
@@ -77,11 +74,13 @@ public class LoginControllerBean
             else {
                session.removeAttribute (SESSION_KEY_REDIRECT_TO);
                try {
-                  ((HttpServletResponse)
-                     ectx.getResponse ()).sendRedirect (redirectURL);
+                  ectx.redirect (redirectURL);
                }
-               catch (final IOException e) {
-                  throw new IllegalStateException (e);
+               catch (final Throwable thrown) {
+                  LOG.log
+                     (Level.WARNING,
+                      "An error oocured while send redirect:",
+                      thrown);
                }
             }
          }

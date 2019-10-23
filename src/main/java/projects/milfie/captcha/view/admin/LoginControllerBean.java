@@ -24,6 +24,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import static projects.milfie.captcha.security.Configuration.*;
@@ -72,9 +73,13 @@ public class LoginControllerBean
                performFacesRedirect (INITIAL_VIEW + '?' + FACES_REDIRECT);
             }
             else {
+               final HttpServletResponse response =
+                  (HttpServletResponse) ectx.getResponse ();
+
                session.removeAttribute (SESSION_KEY_REDIRECT_TO);
+
                try {
-                  ectx.redirect (redirectURL);
+                  ectx.redirect (response.encodeRedirectURL (redirectURL));
                }
                catch (final Throwable thrown) {
                   LOG.log

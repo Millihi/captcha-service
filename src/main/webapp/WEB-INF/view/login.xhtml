@@ -21,44 +21,46 @@
       <f:facet name="caption">#{lcms['ui.auth.caption']}</f:facet>
 
       <h:messages layout="table"
-                  styleClass="center"
+                  styleClass="component-messages"
                   errorClass="error-message"
                   globalOnly="true"
                   showDetail="false"
                   showSummary="true" />
 
-      <form method="post" action="login.xhtml" class="login-form">
-         <table class="component-form-grid">
-            <tr>
-               <td class="left">
-                  <label for="j_username">
-                     #{lcms['ui.auth.username']}
-                  </label>
-               </td>
-               <td>
-                  <input type="text"
-                         id="j_username" name="j_username" />
-               </td>
-            </tr>
-            <tr>
-               <td>
-                  <label for="j_password">
-                     #{lcms['ui.auth.password']}
-                  </label>
-               </td>
-               <td>
-                  <input type="password"
-                         id="j_password" name="j_password" />
-               </td>
-            </tr>
-            <tr>
-               <td colspan="2" class="login-form-actions">
-                  <input type="submit"
-                         value="#{lcms['ui.auth.button.login']}" />
-               </td>
-            </tr>
-         </table>
-      </form>
+      <h:form styleClass="login-form">
+         <h:panelGroup>
+            <table class="component-form-grid">
+               <tr>
+                  <td class="left">
+                     <label for="j_username">
+                        #{lcms['ui.auth.username']}
+                     </label>
+                  </td>
+                  <td>
+                     <input type="text"
+                            id="j_username" name="j_username" />
+                  </td>
+               </tr>
+               <tr>
+                  <td>
+                     <label for="j_password">
+                        #{lcms['ui.auth.password']}
+                     </label>
+                  </td>
+                  <td>
+                     <input type="password"
+                            id="j_password" name="j_password" />
+                  </td>
+               </tr>
+               <tr>
+                  <td colspan="2" class="login-form-actions">
+                     <input type="submit"
+                            value="#{lcms['ui.auth.button.login']}" />
+                  </td>
+               </tr>
+            </table>
+         </h:panelGroup>
+      </h:form>
    </h:panelGrid>
 
 </ui:composition>

@@ -163,9 +163,10 @@ public final class ServerAuthModuleImpl
    {
       final HttpServletRequest request =
          (HttpServletRequest) messageInfo.getRequestMessage ();
+      final String requestURI = cutJsessionId (request.getRequestURI ());
 
       if (POST.equalsIgnoreCase (request.getMethod ()) &&
-          request.getRequestURI ().endsWith (config.getFormAuthAction ()))
+          requestURI.endsWith (config.getFormAuthAction ()))
       {
          request.setAttribute
             (Configuration.ATTR_KEY_IS_POST_AUTH, Boolean.toString (true));
@@ -544,9 +545,23 @@ public final class ServerAuthModuleImpl
    }
 
    private static String getRelativeURL (final HttpServletRequest request) {
+      final String requestURI = cutJsessionId (request.getRequestURI ());
+
       if (request.getQueryString () == null) {
-         return request.getRequestURI ();
+         return requestURI;
       }
-      return request.getRequestURI () + '?' + request.getQueryString ();
+      return requestURI + '?' + request.getQueryString ();
+   }
+
+   private static String cutJsessionId (final String uri) {
+      if (uri != null) {
+         final int endIdx = uri.lastIndexOf (";jsessionid=");
+
+         if (endIdx >= 0) {
+            return uri.substring (0, endIdx);
+         }
+      }
+
+      return uri;
    }
 }

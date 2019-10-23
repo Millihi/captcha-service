@@ -176,7 +176,8 @@ public final class ServerAuthModuleImpl
                (messageInfo,
                 clientSubject,
                 request.getParameter (config.getFormAuthUsernameField ()),
-                request.getParameter (config.getFormAuthPasswordField ()));
+                request.getParameter (config.getFormAuthPasswordField ()),
+                config.isFormAuthStateful ());
       }
 
       return null;
@@ -212,7 +213,8 @@ public final class ServerAuthModuleImpl
             (messageInfo,
              clientSubject,
              credentials.substring (0, colonPos),
-             credentials.substring (colonPos + 1));
+             credentials.substring (colonPos + 1),
+             config.isBasicAuthStateful ());
    }
 
    private AuthStatus tryOnAuthRequired (final MessageInfo messageInfo,
@@ -286,7 +288,8 @@ public final class ServerAuthModuleImpl
    private AuthStatus handleAuthorize (final MessageInfo messageInfo,
                                        final Subject clientSubject,
                                        final String username,
-                                       final String password)
+                                       final String password,
+                                       final boolean stateful)
       throws AuthException
    {
       if (username == null || username.isEmpty () ||
@@ -311,7 +314,9 @@ public final class ServerAuthModuleImpl
               client.getRoles ().stream ()
                     .map (Role::toString).toArray (String[]::new)));
 
-      setRegisterSession (messageInfo);
+      if (stateful) {
+         setRegisterSession (messageInfo);
+      }
 
       return AuthStatus.SUCCESS;
    }

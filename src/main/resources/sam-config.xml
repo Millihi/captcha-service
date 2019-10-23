@@ -15,8 +15,10 @@
    <comment>JASPIC Server Auth Module config</comment>
    <entry key = "excludedFromAuthResources">/puzzle</entry>
    <entry key = "basicAuthEnabled">true</entry>
+   <entry key = "basicAuthStateful">false</entry>
    <entry key = "basicAuthResources">/CaptchaClientService</entry>
    <entry key = "formAuthEnabled">true</entry>
+   <entry key = "formAuthStateful">true</entry>
    <entry key = "formAuthResources">/</entry>
    <entry key = "formAuthLoginPage">/login.xhtml</entry>
    <entry key = "formAuthErrorPage">/login.xhtml</entry>

@@ -58,6 +58,10 @@ public final class Configuration {
       return basicAuthEnabled;
    }
 
+   public boolean isBasicAuthStateful () {
+      return basicAuthStateful;
+   }
+
    public String[] getBasicAuthResources () {
       return basicAuthResources;
    }
@@ -77,6 +81,10 @@ public final class Configuration {
 
    public boolean isFormAuthEnabled () {
       return formAuthEnabled;
+   }
+
+   public boolean isFormAuthStateful () {
+      return formAuthStateful;
    }
 
    public String[] getFormAuthResources () {
@@ -133,8 +141,10 @@ public final class Configuration {
 
    private String[] excludedFromAuthResources;
    private boolean  basicAuthEnabled;
+   private boolean  basicAuthStateful;
    private String[] basicAuthResources;
    private boolean  formAuthEnabled;
+   private boolean  formAuthStateful;
    private String[] formAuthResources;
    private String   formAuthLoginPage;
    private String   formAuthErrorPage;
@@ -237,10 +247,14 @@ public final class Configuration {
          ("excludedFromAuthResources", Converter.STRING_ARRAY, ""),
       BASIC_AUTH_ENABLED
          ("basicAuthEnabled", Converter.BOOLEAN, "false"),
+      BASIC_AUTH_STATEFUL
+         ("basicAuthStateful", Converter.BOOLEAN, "false"),
       BASIC_AUTH_RESOURCES
          ("basicAuthResources", Converter.STRING_ARRAY, "/"),
       FORM_AUTH_ENABLED
          ("formAuthEnabled", Converter.BOOLEAN, "false"),
+      FORM_AUTH_STATEFUL
+         ("formAuthStateful", Converter.BOOLEAN, "true"),
       FORM_AUTH_RESOURCES
          ("formAuthResources", Converter.STRING_ARRAY, "/"),
       FORM_AUTH_LOGIN_PAGE

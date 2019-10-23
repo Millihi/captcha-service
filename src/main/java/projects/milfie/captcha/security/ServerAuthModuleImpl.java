@@ -555,7 +555,7 @@ public final class ServerAuthModuleImpl
 
    private static String cutJsessionId (final String uri) {
       if (uri != null) {
-         final int endIdx = uri.lastIndexOf (";jsessionid=");
+         final int endIdx = uri.indexOf (";jsessionid=");
 
          if (endIdx >= 0) {
             return uri.substring (0, endIdx);

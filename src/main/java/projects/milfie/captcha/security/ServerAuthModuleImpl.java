@@ -83,18 +83,8 @@ public final class ServerAuthModuleImpl
    {
       final Method method = Method.findEnabled (this, messageInfo);
 
-      if (method == null) {
-         algorithm.put
-            (Algorithm.CHECK_IF_ATTEMPT_TO_AUTHORIZE, Action.DO_NOTHING);
-         algorithm.put
-            (Algorithm.TRY_SEND_AUTH_CHALLENGE, Action.DO_NOTHING);
-      }
-      else {
-         algorithm.put
-            (Algorithm.CHECK_IF_ATTEMPT_TO_AUTHORIZE, method.check);
-         algorithm.put
-            (Algorithm.TRY_SEND_AUTH_CHALLENGE, method.send);
-      }
+      algorithm.put (Algorithm.CHECK_IF_ATTEMPT_TO_AUTHORIZE, method.check);
+      algorithm.put (Algorithm.TRY_SEND_AUTH_CHALLENGE, method.send);
 
       for (final Algorithm step : Algorithm.values ()) {
          final AuthStatus result =
@@ -402,8 +392,8 @@ public final class ServerAuthModuleImpl
                return method;
             }
          }
-
-         return null;
+         throw new IllegalStateException
+            ("Unable to find any method enabled.");
       }
 
       /////////////////////////////////////////////////////////////////////////

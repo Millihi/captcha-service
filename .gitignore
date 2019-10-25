@@ -7,6 +7,7 @@ target
 *.7z
 *.iml
 *.xls
+*.pdf
 *.swp
 *.bak
 *~

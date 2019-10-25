@@ -11,10 +11,9 @@
 
 package projects.milfie.captcha.security;
 
-import javax.inject.Inject;
+import java.util.logging.Logger;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
-import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -22,42 +21,58 @@ import javax.servlet.ServletContextListener;
 public final class AutoRegistrationListener
    implements ServletContextListener
 {
-
    ////////////////////////////////////////////////////////////////////////////
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
 
    @Override
    public void contextInitialized (final ServletContextEvent sce) {
-      final AuthConfigProvider provider = new AuthConfigProviderImpl (module);
       final AuthConfigFactory factory = AuthConfigFactory.getFactory ();
+      final AuthConfigProvider provider = new AuthConfigProviderImpl ();
       final ServletContext servletContext = sce.getServletContext ();
 
       moduleRegistrationID = factory.registerConfigProvider
          (provider,
-          "HttpServlet",
+          MESSAGE_LAYER,
           getAppContextID (servletContext),
-          "Captcha authentication config provider");
+          PROVIDER_DESCRIPTION);
+
+      LOGGER.info
+         ("Registered auth config provider " + moduleRegistrationID);
    }
 
    @Override
    public void contextDestroyed (final ServletContextEvent sce) {
+      if (moduleRegistrationID == null || moduleRegistrationID.isEmpty ()) {
+         return;
+      }
+
       final AuthConfigFactory factory = AuthConfigFactory.getFactory ();
 
       factory.removeRegistration (moduleRegistrationID);
+
+      LOGGER.info
+         ("Deregistered auth config provider " + moduleRegistrationID);
+
+      moduleRegistrationID = null;
    }
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   @Inject
-   private ServerAuthModule module;
-   private String moduleRegistrationID = "";
+   private String moduleRegistrationID = null;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //
    ////////////////////////////////////////////////////////////////////////////
+
+   private static final String
+      MESSAGE_LAYER        = "HttpServlet",
+      PROVIDER_DESCRIPTION = "Captcha authentication config provider";
+
+   private static final Logger LOGGER =
+      Logger.getLogger (AutoRegistrationListener.class.getSimpleName ());
 
    private static String getAppContextID (final ServletContext context) {
       return

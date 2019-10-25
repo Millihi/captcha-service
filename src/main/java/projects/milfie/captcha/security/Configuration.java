@@ -14,8 +14,14 @@ package projects.milfie.captcha.security;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Pattern;
+import javax.inject.Singleton;
 
+@Singleton
 public final class Configuration {
 
    ////////////////////////////////////////////////////////////////////////////
@@ -27,6 +33,34 @@ public final class Configuration {
 
    public static final String SESSION_KEY_REDIRECT_TO =
       "projects.milfie.captcha.security.redirectTo";
+
+   public enum AuthType {
+      BASIC (Schema.BASIC_AUTH_RESOURCES, BasicAppServerAuthModule.class),
+      FORM (Schema.FORM_AUTH_RESOURCES, FormAppServerAuthModule.class),
+      NONE (null, DummyAppServerAuthModule.class);
+
+      /////////////////////////////////////////////////////////////////////////
+      //  Public section                                                     //
+      /////////////////////////////////////////////////////////////////////////
+
+      public Class<? extends AppServerAuthModule> getModuleClass () {
+         return moduleClass;
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      //  Private section                                                    //
+      /////////////////////////////////////////////////////////////////////////
+
+      private AuthType (final Schema schema,
+                        final Class<? extends AppServerAuthModule> moduleClass)
+      {
+         this.schema = schema;
+         this.moduleClass = moduleClass;
+      }
+
+      private final Schema                               schema;
+      private final Class<? extends AppServerAuthModule> moduleClass;
+   }
 
    ////////////////////////////////////////////////////////////////////////////
    //  Public section                                                        //
@@ -71,12 +105,7 @@ public final class Configuration {
    }
 
    public boolean isInBasicAuthResources (final String path) {
-      final String resource =
-         getMostSpecificDeclaredResource (path, resourceMap.keySet ());
-
-      return
-         (!resource.isEmpty () &&
-          resourceMap.get (resource).containsKey (AuthType.BASIC));
+      return (getAuthType (path) == AuthType.BASIC);
    }
 
    public boolean isFormAuthEnabled () {
@@ -96,12 +125,7 @@ public final class Configuration {
    }
 
    public boolean isInFormAuthResources (final String path) {
-      final String resource =
-         getMostSpecificDeclaredResource (path, resourceMap.keySet ());
-
-      return
-         (!resource.isEmpty () &&
-          resourceMap.get (resource).containsKey (AuthType.FORM));
+      return (getAuthType (path) == AuthType.FORM);
    }
 
    public String getFormAuthLoginPage () {
@@ -124,6 +148,13 @@ public final class Configuration {
       return formAuthPasswordField;
    }
 
+   public AuthType getAuthType (final String path) {
+      return
+         resourceMap.get
+            (getMostSpecificDeclaredResource
+                (validateResource (path), resourceMap.keySet ()));
+   }
+
    public void reset () {
       loadDefaults ();
    }
@@ -136,8 +167,8 @@ public final class Configuration {
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final String                                  configFile;
-   private final Map<String, EnumMap<AuthType, Boolean>> resourceMap;
+   private final String                configFile;
+   private final Map<String, AuthType> resourceMap;
 
    private String[] excludedFromAuthResources;
    private boolean  basicAuthEnabled;
@@ -189,32 +220,48 @@ public final class Configuration {
       resourceMap.clear ();
 
       for (final AuthType type : AuthType.values ()) {
-         final String[] resources;
+         if (type.schema != null) {
+            final String[] resources;
 
-         try {
-            resources = (String[]) type.schema.field.get (this);
-         }
-         catch (final IllegalAccessException e) {
-            throw (IllegalStateException)
-               new IllegalStateException ().initCause (e);
-         }
-
-         for (final String resource : resources) {
-            if (!resourceMap.containsKey (resource)) {
-               resourceMap.put (resource, new EnumMap<> (AuthType.class));
+            try {
+               resources = (String[]) type.schema.field.get (this);
             }
-            resourceMap.get (resource).put (type, Boolean.TRUE);
+            catch (final IllegalAccessException e) {
+               throw (IllegalStateException)
+                  new IllegalStateException ().initCause (e);
+            }
+
+            for (final String resource : resources) {
+               final AuthType oldType = resourceMap
+                  .put (validateResource (resource), type);
+
+               if (oldType != null) {
+                  throw new IllegalStateException
+                     ("The resource [" + resource + "] " +
+                      "already has declared auth type [" + oldType + "]");
+               }
+            }
          }
       }
 
       for (final String excluded : excludedFromAuthResources) {
-         if (resourceMap.containsKey (excluded)) {
-            resourceMap.get (excluded).clear ();
-         }
-         else {
-            resourceMap.put (excluded, new EnumMap<> (AuthType.class));
-         }
+         resourceMap.put (validateResource (excluded), AuthType.NONE);
       }
+
+      if (resourceMap.get ("/") == null) {
+         resourceMap.put ("/", AuthType.NONE);
+      }
+   }
+
+   private String validateResource (final String resource) {
+      if (resource == null || resource.isEmpty ()) {
+         throw new IllegalArgumentException ("Given resource is null.");
+      }
+      if (resource.charAt (0) != '/') {
+         throw new IllegalArgumentException
+            ("The resource [" + resource + "] does not starts with '/'");
+      }
+      return resource;
    }
 
    ////////////////////////////////////////////////////////////////////////////
@@ -222,25 +269,6 @@ public final class Configuration {
    ////////////////////////////////////////////////////////////////////////////
 
    private static final String DEFAULT_CONFIG_FILE = "sam-config.xml";
-
-   private enum AuthType {
-      BASIC (Schema.BASIC_AUTH_RESOURCES),
-      FORM (Schema.FORM_AUTH_RESOURCES);
-
-      /////////////////////////////////////////////////////////////////////////
-      //  Public section                                                     //
-      /////////////////////////////////////////////////////////////////////////
-
-      public final Schema schema;
-
-      /////////////////////////////////////////////////////////////////////////
-      //  Private section                                                    //
-      /////////////////////////////////////////////////////////////////////////
-
-      private AuthType (final Schema schema) {
-         this.schema = schema;
-      }
-   }
 
    private enum Schema {
       EXCLUDED_FROM_AUTH_RESOURCES
@@ -327,7 +355,7 @@ public final class Configuration {
                if (value == null || value.isEmpty ()) {
                   return EMPTY_STRING_ARRAY;
                }
-               return value.split (",+\\s*");
+               return STRING_ARRAY_PATTERN.split (value);
             }
          };
 
@@ -342,6 +370,9 @@ public final class Configuration {
       /////////////////////////////////////////////////////////////////////////
 
       private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+      private static final Pattern
+         STRING_ARRAY_PATTERN = Pattern.compile ("\\s*,+\\s*");
    }
 
    private static Properties loadProperties (final String configFile) {
@@ -379,19 +410,21 @@ public final class Configuration {
    }
 
    /**
-    * Finds a most specific resource, i.e. the most greater prefix in resource
-    * set for the given path.
+    * Finds a most specific resource, i.e. the most greater prefix in given
+    * resources for the given path.
     *
-    * @param path      the path for searching.
-    * @param resources resources for searching in.
+    * @param path
+    *    the path for searching.
+    * @param resources
+    *    resources for searching in.
     *
     * @return declared resource for given path or empty string otherwise.
     */
    private static String getMostSpecificDeclaredResource (
       final String path,
-      final Collection<String> resources)
+      final String[] resources)
    {
-      String result = "";
+      String result = "/";
 
       if (path == null || path.isEmpty ()) {
          return result;
@@ -412,16 +445,18 @@ public final class Configuration {
     * Finds a most specific resource, i.e. the most greater prefix in given
     * resources for the given path.
     *
-    * @param path      the path for searching.
-    * @param resources resources for searching in.
+    * @param path
+    *    the path for searching.
+    * @param resources
+    *    resources for searching in.
     *
     * @return declared resource for given path or empty string otherwise.
     */
    private static String getMostSpecificDeclaredResource (
       final String path,
-      final String[] resources)
+      final Collection<String> resources)
    {
-      String result = "";
+      String result = "/";
 
       if (path == null || path.isEmpty ()) {
          return result;

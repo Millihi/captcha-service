@@ -11,45 +11,23 @@
 
 package projects.milfie.captcha.security;
 
+import java.util.Collections;
 import java.util.Map;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
-import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ServerAuthConfig;
-import javax.security.auth.message.module.ServerAuthModule;
 
 public final class AuthConfigProviderImpl
    implements AuthConfigProvider
 {
-
    ////////////////////////////////////////////////////////////////////////////
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
 
-   public AuthConfigProviderImpl
-      (final ServerAuthModule serverAuthModule)
-   {
-      if (serverAuthModule == null) {
-         throw new IllegalArgumentException ("SAM is null.");
-      }
-
-      this.serverAuthModule = serverAuthModule;
-      this.properties = null;
-   }
-
-   public AuthConfigProviderImpl
-      (final Map<String, String> properties,
-       final AuthConfigFactory factory)
-   {
-      this.properties = properties;
-      this.serverAuthModule = null;
-
-      if (factory != null) {
-         factory.registerConfigProvider
-            (this, null, null, "Auto registration");
-      }
+   public AuthConfigProviderImpl () {
+      this.properties = Collections.emptyMap ();
    }
 
    @Override
@@ -57,7 +35,6 @@ public final class AuthConfigProviderImpl
       (final String layer,
        final String appContext,
        final CallbackHandler handler)
-      throws AuthException
    {
       return null;
    }
@@ -69,12 +46,12 @@ public final class AuthConfigProviderImpl
        final CallbackHandler handler)
       throws AuthException
    {
-      return new ServerAuthConfigImpl
-         (layer,
-          appContext,
-          handler == null ? createDefaultCallbackHandler () : handler,
-          properties,
-          serverAuthModule);
+      return
+         new ServerAuthConfigImpl
+            (layer,
+             appContext,
+             handler == null ? createDefaultCallbackHandler () : handler,
+             properties);
    }
 
    @Override
@@ -87,7 +64,6 @@ public final class AuthConfigProviderImpl
    ////////////////////////////////////////////////////////////////////////////
 
    private final Map<String, String> properties;
-   private final ServerAuthModule    serverAuthModule;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //
@@ -116,8 +92,8 @@ public final class AuthConfigProviderImpl
             .loadClass (callBackClassName)
             .newInstance ();
       }
-      catch (final Exception e) {
-         throw new AuthException (e.getMessage ());
+      catch (final Throwable thrown) {
+         throw (AuthException) new AuthException ().initCause (thrown);
       }
    }
 }

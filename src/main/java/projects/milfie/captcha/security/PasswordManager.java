@@ -87,6 +87,10 @@ public class PasswordManager {
     *         authentication
     */
    public String createToken (final char[] password) {
+      if (password == null) {
+         throw new IllegalArgumentException ("Given password is null.");
+      }
+
       final byte[] head = new byte[]{(byte) cost};
       final byte[] salt = new byte[SIZE / Byte.SIZE];
 
@@ -127,6 +131,13 @@ public class PasswordManager {
    public boolean isBelongs (final String token,
                              final char[] password)
    {
+      if (token == null) {
+         throw new IllegalArgumentException ("Given token is null.");
+      }
+      if (password == null) {
+         throw new IllegalArgumentException ("Given password is null.");
+      }
+
       final Matcher matcher = TOKEN_REGEX.matcher (token);
 
       if (!matcher.matches ()) {

@@ -18,12 +18,10 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
-import javax.security.auth.message.module.ServerAuthModule;
 
 public final class ServerAuthConfigImpl
    implements ServerAuthConfig
 {
-
    ////////////////////////////////////////////////////////////////////////////
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
@@ -31,13 +29,24 @@ public final class ServerAuthConfigImpl
    public ServerAuthConfigImpl (final String layer,
                                 final String appContext,
                                 final CallbackHandler handler,
-                                final Map<String, String> providerProperties,
-                                final ServerAuthModule serverAuthModule)
+                                final Map<String, String> properties)
    {
+      if (layer == null) {
+         throw new IllegalArgumentException ("Given layer is null.");
+      }
+      if (appContext == null) {
+         throw new IllegalArgumentException ("Given appContext is null.");
+      }
+      if (handler == null) {
+         throw new IllegalArgumentException ("Given handler is null.");
+      }
+      if (properties == null) {
+         throw new IllegalArgumentException ("Given properties is null.");
+      }
       this.layer = layer;
       this.appContext = appContext;
       this.handler = handler;
-      this.serverAuthModule = serverAuthModule;
+      this.properties = properties;
    }
 
    @Override
@@ -47,7 +56,10 @@ public final class ServerAuthConfigImpl
                                             final Map properties)
       throws AuthException
    {
-      return new ServerAuthContextImpl (handler, serverAuthModule);
+      if (appContext.equals (authContextID)) {
+         return new ServerAuthContextImpl (handler);
+      }
+      return null;
    }
 
    @Override
@@ -79,8 +91,8 @@ public final class ServerAuthConfigImpl
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final String           layer;
-   private final String           appContext;
-   private final CallbackHandler  handler;
-   private final ServerAuthModule serverAuthModule;
+   private final String              layer;
+   private final String              appContext;
+   private final CallbackHandler     handler;
+   private final Map<String, String> properties;
 }

@@ -25,21 +25,6 @@ public final class BasicAppServerAuthModule
    extends AbstractAppServerAuthModule
 {
    ////////////////////////////////////////////////////////////////////////////
-   //  Public section                                                        //
-   ////////////////////////////////////////////////////////////////////////////
-
-   @Override
-   @SuppressWarnings ("rawtypes")
-   public Class[] getSupportedMessageTypes () {
-      return SUPPORTED_MESSAGE_TYPES;
-   }
-
-   @Override
-   public boolean isEnabled () {
-      return config.isBasicAuthEnabled ();
-   }
-
-   ////////////////////////////////////////////////////////////////////////////
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
@@ -111,10 +96,4 @@ public final class BasicAppServerAuthModule
       BASIC_PREFIX          = "Basic ",
       AUTHORIZATION_HEADER  = "Authorization",
       AUTHENTICATION_HEADER = "WWW-Authenticate";
-
-   @SuppressWarnings ("rawtypes")
-   private static final Class<?>[] SUPPORTED_MESSAGE_TYPES = new Class[]{
-      HttpServletRequest.class,
-      HttpServletResponse.class
-   };
 }

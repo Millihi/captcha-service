@@ -14,12 +14,11 @@ package projects.milfie.captcha.security;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
+import javax.security.auth.message.module.ServerAuthModule;
 
 @Singleton
 public final class Configuration {
@@ -35,15 +34,22 @@ public final class Configuration {
       "projects.milfie.captcha.security.redirectTo";
 
    public enum AuthType {
-      BASIC (Schema.BASIC_AUTH_RESOURCES, BasicAppServerAuthModule.class),
-      FORM (Schema.FORM_AUTH_RESOURCES, FormAppServerAuthModule.class),
-      NONE (null, DummyAppServerAuthModule.class);
+      BASIC
+         (BasicAppServerAuthModule.class,
+          Schema.BASIC_AUTH_ENABLED,
+          Schema.BASIC_AUTH_RESOURCES),
+      FORM
+         (FormAppServerAuthModule.class,
+          Schema.FORM_AUTH_ENABLED,
+          Schema.FORM_AUTH_RESOURCES),
+      NONE
+         (DummyAppServerAuthModule.class, null, null);
 
       /////////////////////////////////////////////////////////////////////////
       //  Public section                                                     //
       /////////////////////////////////////////////////////////////////////////
 
-      public Class<? extends AppServerAuthModule> getModuleClass () {
+      public Class<? extends ServerAuthModule> getModuleClass () {
          return moduleClass;
       }
 
@@ -51,15 +57,18 @@ public final class Configuration {
       //  Private section                                                    //
       /////////////////////////////////////////////////////////////////////////
 
-      private AuthType (final Schema schema,
-                        final Class<? extends AppServerAuthModule> moduleClass)
+      private AuthType (final Class<? extends ServerAuthModule> moduleClass,
+                        final Schema schemaEnabled,
+                        final Schema schemaResources)
       {
-         this.schema = schema;
          this.moduleClass = moduleClass;
+         this.schemaEnabled = schemaEnabled;
+         this.schemaResources = schemaResources;
       }
 
-      private final Schema                               schema;
-      private final Class<? extends AppServerAuthModule> moduleClass;
+      private final Class<? extends ServerAuthModule> moduleClass;
+      private final Schema                            schemaEnabled;
+      private final Schema                            schemaResources;
    }
 
    ////////////////////////////////////////////////////////////////////////////
@@ -220,26 +229,29 @@ public final class Configuration {
       resourceMap.clear ();
 
       for (final AuthType type : AuthType.values ()) {
-         if (type.schema != null) {
+         if (type.schemaEnabled != null) {
+            final boolean enabled;
             final String[] resources;
 
             try {
-               resources = (String[]) type.schema.field.get (this);
+               enabled = (boolean) type.schemaEnabled.field.get (this);
+               resources = (String[]) type.schemaResources.field.get (this);
             }
-            catch (final IllegalAccessException e) {
-               throw (IllegalStateException)
-                  new IllegalStateException ().initCause (e);
+            catch (final IllegalAccessException cause) {
+               throw new IllegalStateException (cause);
             }
 
             for (final String resource : resources) {
-               final AuthType oldType = resourceMap
-                  .put (validateResource (resource), type);
+               final AuthType oldType =
+                  resourceMap.get (validateResource (resource));
 
                if (oldType != null) {
                   throw new IllegalStateException
                      ("The resource [" + resource + "] " +
                       "already has declared auth type [" + oldType + "]");
                }
+
+               resourceMap.put (resource, (enabled ? type : AuthType.NONE));
             }
          }
       }
@@ -250,6 +262,15 @@ public final class Configuration {
 
       if (resourceMap.get ("/") == null) {
          resourceMap.put ("/", AuthType.NONE);
+      }
+
+      LOGGER.info ("Mapped resources:");
+
+      for (final Map.Entry<String, AuthType> entry : resourceMap.entrySet ()) {
+         LOGGER.info
+            ("     " + entry.getKey () + " as " +
+             entry.getValue ().getClass ().getSimpleName () + '.' +
+             entry.getValue ());
       }
    }
 
@@ -269,6 +290,9 @@ public final class Configuration {
    ////////////////////////////////////////////////////////////////////////////
 
    private static final String DEFAULT_CONFIG_FILE = "sam-config.xml";
+
+   private static final Logger LOGGER =
+      Logger.getLogger (Configuration.class.getName ());
 
    private enum Schema {
       EXCLUDED_FROM_AUTH_RESOURCES

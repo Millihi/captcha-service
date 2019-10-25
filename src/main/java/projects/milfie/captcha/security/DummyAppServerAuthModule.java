@@ -13,57 +13,31 @@ package projects.milfie.captcha.security;
 
 import javax.inject.Singleton;
 import javax.security.auth.Subject;
+import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @Singleton
 public final class DummyAppServerAuthModule
-   extends AbstractAppServerAuthModule
+   extends AbstractHttpServletServerAuthModule
 {
    ////////////////////////////////////////////////////////////////////////////
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
 
    @Override
-   @SuppressWarnings ("rawtypes")
-   public Class[] getSupportedMessageTypes () {
-      return SUPPORTED_MESSAGE_TYPES;
-   }
-
-   @Override
-   public boolean isEnabled () {
-      return true;
-   }
-
-   ////////////////////////////////////////////////////////////////////////////
-   //  Private section                                                       //
-   ////////////////////////////////////////////////////////////////////////////
-
-   @Override
-   protected AuthStatus tryOnMethod (final MessageInfo messageInfo,
-                                     final Subject clientSubject,
+   public AuthStatus secureResponse (final MessageInfo messageInfo,
                                      final Subject serviceSubject)
+      throws AuthException
    {
-      return null;
+      throw new UnsupportedOperationException ();
    }
 
    @Override
-   protected AuthStatus sendChallenge (final MessageInfo messageInfo,
-                                       final Subject clientSubject,
-                                       final Subject serviceSubject)
+   public void cleanSubject (final MessageInfo messageInfo,
+                             final Subject subject)
+      throws AuthException
    {
-      return null;
+      throw new UnsupportedOperationException ();
    }
-
-   ////////////////////////////////////////////////////////////////////////////
-   //  Private static section                                                //
-   ////////////////////////////////////////////////////////////////////////////
-
-   @SuppressWarnings ("rawtypes")
-   private static final Class<?>[] SUPPORTED_MESSAGE_TYPES = new Class[]{
-      HttpServletRequest.class,
-      HttpServletResponse.class
-   };
 }

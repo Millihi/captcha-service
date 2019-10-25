@@ -25,21 +25,6 @@ public final class FormAppServerAuthModule
    extends AbstractAppServerAuthModule
 {
    ////////////////////////////////////////////////////////////////////////////
-   //  Public section                                                        //
-   ////////////////////////////////////////////////////////////////////////////
-
-   @Override
-   @SuppressWarnings ("rawtypes")
-   public Class[] getSupportedMessageTypes () {
-      return SUPPORTED_MESSAGE_TYPES;
-   }
-
-   @Override
-   public boolean isEnabled () {
-      return config.isFormAuthEnabled ();
-   }
-
-   ////////////////////////////////////////////////////////////////////////////
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
@@ -105,10 +90,4 @@ public final class FormAppServerAuthModule
    ////////////////////////////////////////////////////////////////////////////
 
    private static final String POST = "POST";
-
-   @SuppressWarnings ("rawtypes")
-   private static final Class<?>[] SUPPORTED_MESSAGE_TYPES = new Class[]{
-      HttpServletRequest.class,
-      HttpServletResponse.class
-   };
 }

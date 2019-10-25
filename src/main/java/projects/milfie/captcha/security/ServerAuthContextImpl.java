@@ -44,16 +44,14 @@ public final class ServerAuthContextImpl
          throw new IllegalArgumentException ("Given moduleFactory is null.");
       }
 
-      this.handler = handler;
       this.moduleFactory = moduleFactory;
       this.modules = new EnumMap<> (AuthType.class);
+      this.config = moduleFactory.getInstance (Configuration.class);
 
       final Map<String, String> properties = Collections.emptyMap ();
 
-      this.config = moduleFactory.getInstance (Configuration.class);
-
       for (final AuthType type : AuthType.values ()) {
-         final AppServerAuthModule module =
+         final ServerAuthModule module =
             moduleFactory.getInstance (type.getModuleClass ());
          module.initialize
             (DEFAULT_POLICY, DEFAULT_POLICY, handler, properties);
@@ -94,10 +92,9 @@ public final class ServerAuthContextImpl
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final Configuration                          config;
-   private final CallbackHandler                        handler;
-   private final ServerAuthModuleFactory                moduleFactory;
-   private final EnumMap<AuthType, AppServerAuthModule> modules;
+   private final Configuration                       config;
+   private final ServerAuthModuleFactory             moduleFactory;
+   private final EnumMap<AuthType, ServerAuthModule> modules;
 
    private ServerAuthModule getInstance (final String resource) {
       return modules.get (config.getAuthType (resource));

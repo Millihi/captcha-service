@@ -26,7 +26,14 @@ public final class AuthConfigProviderImpl
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
 
-   public AuthConfigProviderImpl () {
+   public AuthConfigProviderImpl
+      (final ServerAuthModuleFactory moduleFactory)
+   {
+      if (moduleFactory == null) {
+         throw new IllegalArgumentException ("Given moduleFactory is null.");
+      }
+
+      this.moduleFactory = moduleFactory;
       this.properties = Collections.emptyMap ();
    }
 
@@ -51,6 +58,7 @@ public final class AuthConfigProviderImpl
             (layer,
              appContext,
              handler == null ? createDefaultCallbackHandler () : handler,
+             moduleFactory,
              properties);
    }
 
@@ -63,7 +71,8 @@ public final class AuthConfigProviderImpl
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final Map<String, String> properties;
+   private final ServerAuthModuleFactory moduleFactory;
+   private final Map<String, String>     properties;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //

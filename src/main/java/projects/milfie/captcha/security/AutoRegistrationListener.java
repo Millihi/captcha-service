@@ -12,6 +12,7 @@
 package projects.milfie.captcha.security;
 
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.servlet.ServletContext;
@@ -27,14 +28,16 @@ public final class AutoRegistrationListener
 
    @Override
    public void contextInitialized (final ServletContextEvent sce) {
+      final AuthConfigProvider provider =
+         new AuthConfigProviderImpl (moduleFactory);
       final AuthConfigFactory factory = AuthConfigFactory.getFactory ();
-      final AuthConfigProvider provider = new AuthConfigProviderImpl ();
       final ServletContext servletContext = sce.getServletContext ();
+      final String appContextID = getAppContextID (servletContext);
 
       moduleRegistrationID = factory.registerConfigProvider
          (provider,
           MESSAGE_LAYER,
-          getAppContextID (servletContext),
+          appContextID,
           PROVIDER_DESCRIPTION);
 
       LOGGER.info
@@ -60,6 +63,9 @@ public final class AutoRegistrationListener
    ////////////////////////////////////////////////////////////////////////////
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
+
+   @Inject
+   private ServerAuthModuleFactory moduleFactory;
 
    private String moduleRegistrationID = null;
 

@@ -14,7 +14,6 @@ package projects.milfie.captcha.security;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import javax.enterprise.inject.spi.CDI;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
@@ -34,24 +33,28 @@ public final class ServerAuthContextImpl
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
 
-   public ServerAuthContextImpl (final CallbackHandler handler)
+   public ServerAuthContextImpl (final CallbackHandler handler,
+                                 final ServerAuthModuleFactory moduleFactory)
       throws AuthException
    {
       if (handler == null) {
          throw new IllegalArgumentException ("Given handler is null.");
       }
+      if (moduleFactory == null) {
+         throw new IllegalArgumentException ("Given moduleFactory is null.");
+      }
 
       this.handler = handler;
+      this.moduleFactory = moduleFactory;
       this.modules = new EnumMap<> (AuthType.class);
 
-      final CDI<Object> cdi = CDI.current ();
       final Map<String, String> properties = Collections.emptyMap ();
 
-      this.config = cdi.select (Configuration.class).get ();
+      this.config = moduleFactory.getInstance (Configuration.class);
 
       for (final AuthType type : AuthType.values ()) {
          final AppServerAuthModule module =
-            cdi.select (type.getModuleClass ()).get ();
+            moduleFactory.getInstance (type.getModuleClass ());
          module.initialize
             (DEFAULT_POLICY, DEFAULT_POLICY, handler, properties);
          modules.put (type, module);
@@ -93,6 +96,7 @@ public final class ServerAuthContextImpl
 
    private final Configuration                          config;
    private final CallbackHandler                        handler;
+   private final ServerAuthModuleFactory                moduleFactory;
    private final EnumMap<AuthType, AppServerAuthModule> modules;
 
    private ServerAuthModule getInstance (final String resource) {

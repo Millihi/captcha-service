@@ -29,6 +29,7 @@ public final class ServerAuthConfigImpl
    public ServerAuthConfigImpl (final String layer,
                                 final String appContext,
                                 final CallbackHandler handler,
+                                final ServerAuthModuleFactory moduleFactory,
                                 final Map<String, String> properties)
    {
       if (layer == null) {
@@ -40,12 +41,16 @@ public final class ServerAuthConfigImpl
       if (handler == null) {
          throw new IllegalArgumentException ("Given handler is null.");
       }
+      if (moduleFactory == null) {
+         throw new IllegalArgumentException ("Given moduleFactory is null.");
+      }
       if (properties == null) {
          throw new IllegalArgumentException ("Given properties is null.");
       }
       this.layer = layer;
       this.appContext = appContext;
       this.handler = handler;
+      this.moduleFactory = moduleFactory;
       this.properties = properties;
    }
 
@@ -57,7 +62,7 @@ public final class ServerAuthConfigImpl
       throws AuthException
    {
       if (appContext.equals (authContextID)) {
-         return new ServerAuthContextImpl (handler);
+         return new ServerAuthContextImpl (handler, moduleFactory);
       }
       return null;
    }
@@ -91,8 +96,9 @@ public final class ServerAuthConfigImpl
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final String              layer;
-   private final String              appContext;
-   private final CallbackHandler     handler;
-   private final Map<String, String> properties;
+   private final String                  layer;
+   private final String                  appContext;
+   private final CallbackHandler         handler;
+   private final ServerAuthModuleFactory moduleFactory;
+   private final Map<String, String>     properties;
 }

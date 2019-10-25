@@ -11,7 +11,6 @@
 
 package projects.milfie.captcha.security;
 
-import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
@@ -34,30 +33,16 @@ public final class AutoRegistrationListener
       final ServletContext servletContext = sce.getServletContext ();
       final String appContextID = getAppContextID (servletContext);
 
-      moduleRegistrationID = factory.registerConfigProvider
+      factory.registerConfigProvider
          (provider,
           MESSAGE_LAYER,
           appContextID,
           PROVIDER_DESCRIPTION);
-
-      LOGGER.info
-         ("Registered auth config provider " + moduleRegistrationID);
    }
 
    @Override
    public void contextDestroyed (final ServletContextEvent sce) {
-      if (moduleRegistrationID == null || moduleRegistrationID.isEmpty ()) {
-         return;
-      }
-
-      final AuthConfigFactory factory = AuthConfigFactory.getFactory ();
-
-      factory.removeRegistration (moduleRegistrationID);
-
-      LOGGER.info
-         ("Deregistered auth config provider " + moduleRegistrationID);
-
-      moduleRegistrationID = null;
+      return;
    }
 
    ////////////////////////////////////////////////////////////////////////////
@@ -67,8 +52,6 @@ public final class AutoRegistrationListener
    @Inject
    private ServerAuthModuleFactory moduleFactory;
 
-   private String moduleRegistrationID = null;
-
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //
    ////////////////////////////////////////////////////////////////////////////
@@ -76,9 +59,6 @@ public final class AutoRegistrationListener
    private static final String
       MESSAGE_LAYER        = "HttpServlet",
       PROVIDER_DESCRIPTION = "Captcha authentication config provider";
-
-   private static final Logger LOGGER =
-      Logger.getLogger (AutoRegistrationListener.class.getName ());
 
    private static String getAppContextID (final ServletContext context) {
       return

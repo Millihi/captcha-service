@@ -12,6 +12,7 @@
 package projects.milfie.captcha.security;
 
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
@@ -30,7 +31,7 @@ public final class ServerAuthConfigImpl
                                 final String appContext,
                                 final CallbackHandler handler,
                                 final ServerAuthModuleFactory moduleFactory,
-                                final Map<String, String> properties)
+                                final Map<String, String> providerProperties)
    {
       if (layer == null) {
          throw new IllegalArgumentException ("Given layer is null.");
@@ -44,14 +45,19 @@ public final class ServerAuthConfigImpl
       if (moduleFactory == null) {
          throw new IllegalArgumentException ("Given moduleFactory is null.");
       }
-      if (properties == null) {
-         throw new IllegalArgumentException ("Given properties is null.");
+      if (providerProperties == null) {
+         throw
+            new IllegalArgumentException
+               ("Given providerProperties is null.");
       }
+
       this.layer = layer;
       this.appContext = appContext;
       this.handler = handler;
       this.moduleFactory = moduleFactory;
-      this.properties = properties;
+      this.providerProperties = providerProperties;
+
+      this.loadServerAuthContext ();
    }
 
    @Override
@@ -59,12 +65,8 @@ public final class ServerAuthConfigImpl
                                             final Subject serviceSubject,
                                             @SuppressWarnings ("rawtypes")
                                             final Map properties)
-      throws AuthException
    {
-      if (appContext.equals (authContextID)) {
-         return new ServerAuthContextImpl (handler, moduleFactory);
-      }
-      return null;
+      return (appContext.equals (authContextID) ? serverAuthContext : null);
    }
 
    @Override
@@ -84,7 +86,8 @@ public final class ServerAuthConfigImpl
 
    @Override
    public void refresh () {
-      return;
+      LOGGER.info ("Refresh of auth contexts is started.");
+      loadServerAuthContext ();
    }
 
    @Override
@@ -100,5 +103,24 @@ public final class ServerAuthConfigImpl
    private final String                  appContext;
    private final CallbackHandler         handler;
    private final ServerAuthModuleFactory moduleFactory;
-   private final Map<String, String>     properties;
+   private final Map<String, String>     providerProperties;
+
+   private ServerAuthContext serverAuthContext;
+
+   private void loadServerAuthContext () {
+      try {
+         serverAuthContext =
+            new ServerAuthContextImpl (handler, moduleFactory);
+      }
+      catch (final AuthException cause) {
+         throw new IllegalStateException (cause);
+      }
+   }
+
+   ////////////////////////////////////////////////////////////////////////////
+   //  Private static section                                                //
+   ////////////////////////////////////////////////////////////////////////////
+
+   private static final Logger LOGGER =
+      Logger.getLogger (ServerAuthConfigImpl.class.getName ());
 }

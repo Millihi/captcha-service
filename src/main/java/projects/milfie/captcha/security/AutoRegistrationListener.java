@@ -78,7 +78,7 @@ public final class AutoRegistrationListener
       PROVIDER_DESCRIPTION = "Captcha authentication config provider";
 
    private static final Logger LOGGER =
-      Logger.getLogger (AutoRegistrationListener.class.getSimpleName ());
+      Logger.getLogger (AutoRegistrationListener.class.getName ());
 
    private static String getAppContextID (final ServletContext context) {
       return

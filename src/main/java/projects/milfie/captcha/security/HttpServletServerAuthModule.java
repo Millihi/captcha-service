@@ -27,7 +27,7 @@ import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-abstract class AbstractHttpServletServerAuthModule
+abstract class HttpServletServerAuthModule
    implements ServerAuthModule
 {
    ////////////////////////////////////////////////////////////////////////////

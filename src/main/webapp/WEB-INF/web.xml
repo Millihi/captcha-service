@@ -70,7 +70,7 @@
       <description>Private authentication module</description>
       <display-name>SAM</display-name>
       <listener-class>
-         projects.milfie.captcha.security.AutoRegistrationListener
+         projects.milfie.captcha.security.AuthProviderRegistrar
       </listener-class>
    </listener>
 

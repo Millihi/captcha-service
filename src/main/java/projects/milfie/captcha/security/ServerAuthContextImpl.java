@@ -12,7 +12,6 @@
 package projects.milfie.captcha.security;
 
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -21,10 +20,7 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.config.ServerAuthContext;
-import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
-
-import static projects.milfie.captcha.security.Configuration.AuthType;
 
 public final class ServerAuthContextImpl
    implements ServerAuthContext
@@ -33,29 +29,26 @@ public final class ServerAuthContextImpl
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
 
-   public ServerAuthContextImpl (final CallbackHandler handler,
-                                 final ServerAuthModuleFactory moduleFactory)
+   public ServerAuthContextImpl
+      (final CallbackHandler handler,
+       final AuthModuleProvider moduleProvider)
       throws AuthException
    {
       if (handler == null) {
          throw new IllegalArgumentException ("Given handler is null.");
       }
-      if (moduleFactory == null) {
-         throw new IllegalArgumentException ("Given moduleFactory is null.");
+      if (moduleProvider == null) {
+         throw new IllegalArgumentException ("Given moduleProvider is null.");
       }
 
-      this.moduleFactory = moduleFactory;
-      this.modules = new EnumMap<> (AuthType.class);
-      this.config = moduleFactory.getInstance (Configuration.class);
+      this.moduleProvider = moduleProvider;
 
       final Map<String, String> properties = Collections.emptyMap ();
 
-      for (final AuthType type : AuthType.values ()) {
-         final ServerAuthModule module =
-            moduleFactory.getInstance (type.getModuleClass ());
-         module.initialize
-            (DEFAULT_POLICY, DEFAULT_POLICY, handler, properties);
-         modules.put (type, module);
+      for (final AuthTypeSpec spec : AuthTypeSpec.values ()) {
+         moduleProvider
+            .getInstance (spec.getModuleClass ())
+            .initialize (DEFAULT_POLICY, DEFAULT_POLICY, handler, properties);
       }
    }
 
@@ -65,9 +58,16 @@ public final class ServerAuthContextImpl
                                       final Subject serviceSubject)
       throws AuthException
    {
-      return
-         getInstance (getResourceURI (messageInfo))
-            .validateRequest (messageInfo, clientSubject, serviceSubject);
+      moduleProvider.getReadLock ().lock ();
+      try {
+         return
+            moduleProvider
+               .getModuleInstance (getResourceURI (messageInfo))
+               .validateRequest (messageInfo, clientSubject, serviceSubject);
+      }
+      finally {
+         moduleProvider.getReadLock ().unlock ();
+      }
    }
 
    @Override
@@ -92,13 +92,7 @@ public final class ServerAuthContextImpl
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final Configuration                       config;
-   private final ServerAuthModuleFactory             moduleFactory;
-   private final EnumMap<AuthType, ServerAuthModule> modules;
-
-   private ServerAuthModule getInstance (final String resource) {
-      return modules.get (config.getAuthType (resource));
-   }
+   private final AuthModuleProvider moduleProvider;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //

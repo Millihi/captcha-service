@@ -30,7 +30,7 @@ public final class ServerAuthConfigImpl
    public ServerAuthConfigImpl (final String layer,
                                 final String appContext,
                                 final CallbackHandler handler,
-                                final ServerAuthModuleFactory moduleFactory,
+                                final AuthModuleProvider moduleProvider,
                                 final Map<String, String> providerProperties)
    {
       if (layer == null) {
@@ -42,8 +42,8 @@ public final class ServerAuthConfigImpl
       if (handler == null) {
          throw new IllegalArgumentException ("Given handler is null.");
       }
-      if (moduleFactory == null) {
-         throw new IllegalArgumentException ("Given moduleFactory is null.");
+      if (moduleProvider == null) {
+         throw new IllegalArgumentException ("Given moduleProvider is null.");
       }
       if (providerProperties == null) {
          throw
@@ -54,10 +54,10 @@ public final class ServerAuthConfigImpl
       this.layer = layer;
       this.appContext = appContext;
       this.handler = handler;
-      this.moduleFactory = moduleFactory;
+      this.moduleProvider = moduleProvider;
       this.providerProperties = providerProperties;
 
-      this.loadServerAuthContext ();
+      this.createServerAuthContext ();
    }
 
    @Override
@@ -87,7 +87,7 @@ public final class ServerAuthConfigImpl
    @Override
    public void refresh () {
       LOGGER.info ("Refresh of auth contexts is started.");
-      loadServerAuthContext ();
+      createServerAuthContext ();
    }
 
    @Override
@@ -99,21 +99,25 @@ public final class ServerAuthConfigImpl
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final String                  layer;
-   private final String                  appContext;
-   private final CallbackHandler         handler;
-   private final ServerAuthModuleFactory moduleFactory;
-   private final Map<String, String>     providerProperties;
+   private final String              layer;
+   private final String              appContext;
+   private final CallbackHandler     handler;
+   private final AuthModuleProvider  moduleProvider;
+   private final Map<String, String> providerProperties;
 
    private ServerAuthContext serverAuthContext;
 
-   private void loadServerAuthContext () {
+   private void createServerAuthContext () {
+      moduleProvider.getReadLock ().lock ();
       try {
          serverAuthContext =
-            new ServerAuthContextImpl (handler, moduleFactory);
+            new ServerAuthContextImpl (handler, moduleProvider);
       }
       catch (final AuthException cause) {
          throw new IllegalStateException (cause);
+      }
+      finally {
+         moduleProvider.getReadLock ().unlock ();
       }
    }
 

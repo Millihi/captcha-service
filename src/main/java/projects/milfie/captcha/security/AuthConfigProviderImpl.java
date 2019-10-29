@@ -13,6 +13,7 @@ package projects.milfie.captcha.security;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.config.AuthConfigProvider;
@@ -27,13 +28,13 @@ public final class AuthConfigProviderImpl
    ////////////////////////////////////////////////////////////////////////////
 
    public AuthConfigProviderImpl
-      (final ServerAuthModuleFactory moduleFactory)
+      (final AuthModuleProvider moduleProvider)
    {
-      if (moduleFactory == null) {
-         throw new IllegalArgumentException ("Given moduleFactory is null.");
+      if (moduleProvider == null) {
+         throw new IllegalArgumentException ("Given moduleProvider is null.");
       }
 
-      this.moduleFactory = moduleFactory;
+      this.moduleProvider = moduleProvider;
       this.properties = Collections.emptyMap ();
    }
 
@@ -58,25 +59,29 @@ public final class AuthConfigProviderImpl
             (layer,
              appContext,
              handler == null ? createDefaultCallbackHandler () : handler,
-             moduleFactory,
+             moduleProvider,
              properties);
    }
 
    @Override
    public void refresh () {
-      return;
+      LOGGER.info ("Refresh of auth configs is started.");
+      moduleProvider.refresh ();
    }
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final ServerAuthModuleFactory moduleFactory;
-   private final Map<String, String>     properties;
+   private final AuthModuleProvider  moduleProvider;
+   private final Map<String, String> properties;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //
    ////////////////////////////////////////////////////////////////////////////
+
+   private static final Logger LOGGER =
+      Logger.getLogger (AuthConfigProviderImpl.class.getName ());
 
    private static final String CALLBACK_HANDLER_PROPERTY_NAME =
       "authconfigprovider.client.callbackhandler";

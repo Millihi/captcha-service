@@ -11,33 +11,23 @@
 
 package projects.milfie.captcha.security;
 
-import javax.inject.Singleton;
-import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
-
-@Singleton
-public final class DummyAppServerAuthModule
-   extends AbstractHttpServletServerAuthModule
+abstract class AppServerAuthModuleConfig
+   extends HttpServletServerAuthConfig
 {
    ////////////////////////////////////////////////////////////////////////////
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
 
-   @Override
-   public AuthStatus secureResponse (final MessageInfo messageInfo,
-                                     final Subject serviceSubject)
-      throws AuthException
+   public AppServerAuthModuleConfig
+      (final Class<? extends Schema> schemaClass,
+       final String propertyPrefix)
    {
-      throw new UnsupportedOperationException ();
+      super (schemaClass, propertyPrefix);
    }
 
-   @Override
-   public void cleanSubject (final MessageInfo messageInfo,
-                             final Subject subject)
-      throws AuthException
-   {
-      throw new UnsupportedOperationException ();
-   }
+   public abstract boolean isEnabled ();
+
+   public abstract boolean isStateful ();
+
+   public abstract String[] getResources ();
 }

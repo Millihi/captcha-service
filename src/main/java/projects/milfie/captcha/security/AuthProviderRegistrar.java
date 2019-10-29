@@ -18,7 +18,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-public final class AutoRegistrationListener
+public final class AuthProviderRegistrar
    implements ServletContextListener
 {
    ////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ public final class AutoRegistrationListener
    @Override
    public void contextInitialized (final ServletContextEvent sce) {
       final AuthConfigProvider provider =
-         new AuthConfigProviderImpl (moduleFactory);
+         new AuthConfigProviderImpl (moduleProvider);
       final AuthConfigFactory factory = AuthConfigFactory.getFactory ();
       final ServletContext servletContext = sce.getServletContext ();
       final String appContextID = getAppContextID (servletContext);
@@ -50,7 +50,7 @@ public final class AutoRegistrationListener
    ////////////////////////////////////////////////////////////////////////////
 
    @Inject
-   private ServerAuthModuleFactory moduleFactory;
+   private AuthModuleProvider moduleProvider;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //

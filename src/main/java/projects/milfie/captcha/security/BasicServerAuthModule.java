@@ -11,7 +11,8 @@
 
 package projects.milfie.captcha.security;
 
-import java.io.IOException;
+import java.util.Base64;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthException;
@@ -21,12 +22,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Singleton
-public final class FormAppServerAuthModule
-   extends AbstractAppServerAuthModule
+public final class BasicServerAuthModule
+   extends AppServerAuthModule
 {
    ////////////////////////////////////////////////////////////////////////////
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
+
+   @Inject
+   private BasicServerAuthModuleConfig config;
 
    @Override
    protected AuthStatus tryOnMethod (final MessageInfo messageInfo,
@@ -34,53 +38,56 @@ public final class FormAppServerAuthModule
                                      final Subject serviceSubject)
       throws AuthException
    {
-      final HttpServletRequest request =
-         (HttpServletRequest) messageInfo.getRequestMessage ();
+      final String authHeader = ((HttpServletRequest)
+         messageInfo.getRequestMessage ()).getHeader (AUTHORIZATION_HEADER);
 
-      if (!POST.equalsIgnoreCase (request.getMethod ())) {
+      if (authHeader == null) {
          return null;
       }
 
-      final String requestURI = cutJsessionId (request.getRequestURI ());
-
-      if (!requestURI.endsWith (config.getFormAuthAction ())) {
-         return null;
+      if (!authHeader.startsWith (BASIC_PREFIX)) {
+         return handleNotAuthorized (clientSubject);
       }
 
-      request.setAttribute
-         (Configuration.ATTR_KEY_IS_POST_AUTH, Boolean.toString (true));
+      final String credentials = new String
+         (Base64.getDecoder ().decode
+            (authHeader.substring (BASIC_PREFIX.length ()).trim ()));
+
+      final int colonPos = credentials.indexOf (':');
+
+      if (colonPos <= 0 || colonPos >= credentials.length () - 1) {
+         return handleNotAuthorized (clientSubject);
+      }
 
       return
          handleAuthorize
             (messageInfo,
              clientSubject,
-             request.getParameter (config.getFormAuthUsernameField ()),
-             request.getParameter (config.getFormAuthPasswordField ()),
-             config.isFormAuthStateful ());
+             credentials.substring (0, colonPos),
+             credentials.substring (colonPos + 1),
+             config.isStateful ());
    }
 
    @Override
    protected AuthStatus sendChallenge (final MessageInfo messageInfo,
                                        final Subject clientSubject,
                                        final Subject serviceSubject)
-      throws AuthException
    {
       final HttpServletRequest request =
          (HttpServletRequest) messageInfo.getRequestMessage ();
       final HttpServletResponse response =
          (HttpServletResponse) messageInfo.getResponseMessage ();
-      final String loginURI =
-         request.getContextPath () + config.getFormAuthLoginPage ();
 
-      request.getSession (true).setAttribute
-         (Configuration.SESSION_KEY_REDIRECT_TO, getRelativeURL (request));
+      String realm = request.getServletContext ().getServletContextName ();
 
-      try {
-         response.sendRedirect (response.encodeRedirectURL (loginURI));
+      if (realm == null || realm.isEmpty ()) {
+         realm = request.getServerName () + request.getContextPath ();
       }
-      catch (final IOException e) {
-         throw (AuthException) new AuthException ().initCause (e);
-      }
+
+      response.setHeader
+         (AUTHENTICATION_HEADER, BASIC_PREFIX + "realm=\"" + realm + "\"");
+      response.setStatus
+         (HttpServletResponse.SC_UNAUTHORIZED);
 
       return AuthStatus.SEND_CONTINUE;
    }
@@ -89,5 +96,8 @@ public final class FormAppServerAuthModule
    //  Private static section                                                //
    ////////////////////////////////////////////////////////////////////////////
 
-   private static final String POST = "POST";
+   private static final String
+      BASIC_PREFIX          = "Basic ",
+      AUTHORIZATION_HEADER  = "Authorization",
+      AUTHENTICATION_HEADER = "WWW-Authenticate";
 }

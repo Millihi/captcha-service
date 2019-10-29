@@ -24,8 +24,8 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
 
-abstract class AbstractAppServerAuthModule
-   extends AbstractHttpServletServerAuthModule
+abstract class AppServerAuthModule
+   extends HttpServletServerAuthModule
 {
    ////////////////////////////////////////////////////////////////////////////
    //  Public section                                                        //
@@ -90,8 +90,6 @@ abstract class AbstractAppServerAuthModule
    protected AccountServiceLocalBean accountService;
    @Inject
    protected PasswordManager         passwordManager;
-   @Inject
-   protected Configuration           config;
 
    protected abstract AuthStatus tryOnMethod
       (final MessageInfo messageInfo,

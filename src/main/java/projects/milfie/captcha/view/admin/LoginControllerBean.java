@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import static projects.milfie.captcha.security.Configuration.*;
+import static projects.milfie.captcha.security.GeneralServerAuthConfig.*;
 import static projects.milfie.captcha.view.admin.Configuration.*;
 
 @ViewScoped

@@ -65,14 +65,14 @@ public final class FormServerAuthModuleConfig
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private boolean  enabled;
-   private boolean  stateful;
-   private String[] resources;
-   private String   loginPage;
-   private String   errorPage;
-   private String   action;
-   private String   usernameField;
-   private String   passwordField;
+   private volatile boolean  enabled;
+   private volatile boolean  stateful;
+   private volatile String[] resources;
+   private volatile String   loginPage;
+   private volatile String   errorPage;
+   private volatile String   action;
+   private volatile String   usernameField;
+   private volatile String   passwordField;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //

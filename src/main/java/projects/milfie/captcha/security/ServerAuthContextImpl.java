@@ -58,16 +58,10 @@ public final class ServerAuthContextImpl
                                       final Subject serviceSubject)
       throws AuthException
    {
-      moduleProvider.getReadLock ().lock ();
-      try {
-         return
-            moduleProvider
-               .getModuleInstance (getResourceURI (messageInfo))
-               .validateRequest (messageInfo, clientSubject, serviceSubject);
-      }
-      finally {
-         moduleProvider.getReadLock ().unlock ();
-      }
+      return
+         moduleProvider
+            .getDeclaredModule (getResourceURI (messageInfo))
+            .validateRequest (messageInfo, clientSubject, serviceSubject);
    }
 
    @Override

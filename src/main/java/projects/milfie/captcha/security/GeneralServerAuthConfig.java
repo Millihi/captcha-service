@@ -42,7 +42,7 @@ public final class GeneralServerAuthConfig
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private String[] excludedResources;
+   private volatile String[] excludedResources;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //

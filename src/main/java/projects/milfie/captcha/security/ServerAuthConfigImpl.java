@@ -56,17 +56,7 @@ public final class ServerAuthConfigImpl
       this.handler = handler;
       this.moduleProvider = moduleProvider;
       this.providerProperties = providerProperties;
-
-      this.createServerAuthContext ();
-   }
-
-   @Override
-   public ServerAuthContext getAuthContext (final String authContextID,
-                                            final Subject serviceSubject,
-                                            @SuppressWarnings ("rawtypes")
-                                            final Map properties)
-   {
-      return (appContext.equals (authContextID) ? serverAuthContext : null);
+      this.serverAuthContext = null;
    }
 
    @Override
@@ -85,14 +75,46 @@ public final class ServerAuthConfigImpl
    }
 
    @Override
-   public void refresh () {
-      LOGGER.info ("Refresh of auth contexts is started.");
-      createServerAuthContext ();
-   }
-
-   @Override
    public boolean isProtected () {
       return false;
+   }
+
+   /**
+    * Takes care about concurency.
+    * {@inheritDoc}
+    */
+   @Override
+   public ServerAuthContext getAuthContext (final String authContextID,
+                                            final Subject serviceSubject,
+                                            @SuppressWarnings ("rawtypes")
+                                            final Map properties)
+   {
+      ServerAuthContext result = null;
+
+      if (appContext.equals (authContextID)) {
+         result = serverAuthContext;
+
+         if (result == null) {
+            synchronized (this) {
+               if (serverAuthContext == null) {
+                  serverAuthContext = createServerAuthContext ();
+               }
+               result = serverAuthContext;
+            }
+         }
+      }
+      return result;
+   }
+
+   /**
+    * Takes care about concurency.
+    * {@inheritDoc}
+    */
+   @Override
+   public synchronized void refresh () {
+      LOGGER.info ("Refresh of auth contexts is started.");
+
+      serverAuthContext = null;
    }
 
    ////////////////////////////////////////////////////////////////////////////
@@ -105,19 +127,15 @@ public final class ServerAuthConfigImpl
    private final AuthModuleProvider  moduleProvider;
    private final Map<String, String> providerProperties;
 
-   private ServerAuthContext serverAuthContext;
+   private volatile ServerAuthContext serverAuthContext;
 
-   private void createServerAuthContext () {
-      moduleProvider.getReadLock ().lock ();
+   private ServerAuthContext createServerAuthContext () {
+      LOGGER.info ("Create a new auth context.");
       try {
-         serverAuthContext =
-            new ServerAuthContextImpl (handler, moduleProvider);
+         return new ServerAuthContextImpl (handler, moduleProvider);
       }
       catch (final AuthException cause) {
          throw new IllegalStateException (cause);
-      }
-      finally {
-         moduleProvider.getReadLock ().unlock ();
       }
    }
 

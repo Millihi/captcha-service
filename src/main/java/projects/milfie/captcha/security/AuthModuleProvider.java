@@ -14,8 +14,7 @@ package projects.milfie.captcha.security;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.CDI;
@@ -28,20 +27,10 @@ public class AuthModuleProvider {
    //  Public section                                                        //
    ////////////////////////////////////////////////////////////////////////////
 
-   public Lock getReadLock () {
-      return readLock;
-   }
-
-   public ServerAuthModule getModuleInstance (final String path) {
+   public ServerAuthModule getDeclaredModule (final String path) {
       return
          ServerAuthModule.class.cast
             (instances.get (getAuthTypeSpec (path).getModuleClass ()));
-   }
-
-   public AppServerAuthModuleConfig getConfigInstance (final String path) {
-      return
-         AppServerAuthModuleConfig.class.cast
-            (instances.get (getAuthTypeSpec (path).getConfigClass ()));
    }
 
    public <T> T getInstance (final Class<T> instanceClass) {
@@ -49,107 +38,86 @@ public class AuthModuleProvider {
    }
 
    public AuthTypeSpec getAuthTypeSpec (final String path) {
+      final Map<String, AuthTypeSpec> resources = this.resources;
       return
-         resourceMap.get
+         resources.getOrDefault
             (getMostSpecificDeclaredResource
-                (validateResource (path), resourceMap.keySet ()));
+                (validateResource (path), resources.keySet ()),
+             AuthTypeSpec.NONE);
    }
 
-   public void refresh () {
-      writeLock.lock ();
-      try {
-         instances.clear ();
-         resourceMap.clear ();
-         initialize ();
-      }
-      finally {
-         writeLock.unlock ();
-      }
+   public synchronized void refresh () {
+      resources = dummyResources;
+      reloadConfigModules ();
+      resources = workResources;
    }
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private final Map<Class<?>, Object>     instances   = new HashMap<> ();
-   private final Map<String, AuthTypeSpec> resourceMap = new HashMap<> ();
-
    private final
-   ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock ();
-   private final Lock readLock  = readWriteLock.readLock ();
-   private final Lock writeLock = readWriteLock.writeLock ();
+   Map<Class<?>, Object>     instances      = new HashMap<> ();
+   private final
+   Map<String, AuthTypeSpec> dummyResources = new HashMap<> ();
+   private final
+   Map<String, AuthTypeSpec> workResources  = new ConcurrentHashMap<> ();
+   private volatile
+   Map<String, AuthTypeSpec> resources      = dummyResources;
 
    @PostConstruct
    private void initialize () {
       final GeneralServerAuthConfig generalConfig =
-         CDI.current ().select (GeneralServerAuthConfig.class).get ();
+         obtainFromCDI (GeneralServerAuthConfig.class);
 
       generalConfig.reload ();
       instances.put (generalConfig.getClass (), generalConfig);
 
       for (final AuthTypeSpec authType : AuthTypeSpec.values ()) {
          final ServerAuthModule authModule =
-            CDI.current ().select (authType.getModuleClass ()).get ();
+            obtainFromCDI (authType.getModuleClass ());
 
          instances.put (authModule.getClass (), authModule);
 
          if (authType.hasConfig ()) {
             final AppServerAuthModuleConfig moduleConfig =
-               CDI.current ().select (authType.getConfigClass ()).get ();
+               obtainFromCDI (authType.getConfigClass ());
 
             moduleConfig.reload ();
-            mapModuleResources (authType, moduleConfig);
+            mapModuleResources (authType, moduleConfig, workResources);
             instances.put (moduleConfig.getClass (), moduleConfig);
          }
       }
 
-      mapExcludedResources (generalConfig);
-      mapRootResource ();
-      logMappedResources ();
+      mapExcludedResources (generalConfig, workResources);
+      mapRootResource (workResources);
+      mapRootResource (dummyResources);
+      logMappedResources (workResources);
+
+      resources = workResources;
    }
 
-   private void mapModuleResources (final AuthTypeSpec spec,
-                                    final AppServerAuthModuleConfig config)
-   {
-      for (final String resource : config.getResources ()) {
-         final AuthTypeSpec oldSpec =
-            resourceMap.get (validateResource (resource));
+   private void reloadConfigModules () {
+      workResources.clear ();
 
-         if (oldSpec != null) {
-            throw new IllegalStateException
-               ("The resource [" + resource + "] " +
-                "already has declared auth type [" + oldSpec + "]");
+      final GeneralServerAuthConfig generalConfig =
+         getInstance (GeneralServerAuthConfig.class);
+
+      generalConfig.reload ();
+
+      for (final AuthTypeSpec authType : AuthTypeSpec.values ()) {
+         if (authType.hasConfig ()) {
+            final AppServerAuthModuleConfig moduleConfig =
+               getInstance (authType.getConfigClass ());
+
+            moduleConfig.reload ();
+            mapModuleResources (authType, moduleConfig, workResources);
          }
-
-         resourceMap.put
-            (resource, config.isEnabled () ? spec : AuthTypeSpec.NONE);
       }
-   }
 
-   private void mapExcludedResources (final GeneralServerAuthConfig config) {
-      for (final String excluded : config.getExcludedResources ()) {
-         resourceMap.put (validateResource (excluded), AuthTypeSpec.NONE);
-      }
-   }
-
-   private void mapRootResource () {
-      if (resourceMap.get (RESOURCE_ROOT) == null) {
-         resourceMap.put (RESOURCE_ROOT, AuthTypeSpec.NONE);
-      }
-   }
-
-   private void logMappedResources () {
-      LOGGER.info ("Mapped resources:");
-
-      for (final Map.Entry<String, AuthTypeSpec> entry :
-         resourceMap.entrySet ())
-      {
-         final String resource = entry.getKey ();
-         final AuthTypeSpec spec = entry.getValue ();
-         LOGGER.info
-            ("     " + resource + " as " +
-             spec.getClass ().getSimpleName () + '.' + spec);
-      }
+      mapExcludedResources (generalConfig, workResources);
+      mapRootResource (workResources);
+      logMappedResources (workResources);
    }
 
    ////////////////////////////////////////////////////////////////////////////
@@ -160,6 +128,62 @@ public class AuthModuleProvider {
 
    private static final Logger LOGGER =
       Logger.getLogger (AuthModuleProvider.class.getName ());
+
+   private static <T> T obtainFromCDI (final Class<T> cl) {
+      return CDI.current ().select (cl).get ();
+   }
+
+   private static void mapModuleResources
+      (final AuthTypeSpec spec,
+       final AppServerAuthModuleConfig config,
+       final Map<String, AuthTypeSpec> resources)
+   {
+      for (final String resource : config.getResources ()) {
+         final AuthTypeSpec oldSpec =
+            resources.get (validateResource (resource));
+
+         if (oldSpec != null) {
+            throw new IllegalStateException
+               ("The resource [" + resource + "] " +
+                "already has declared auth type [" + oldSpec + "]");
+         }
+
+         resources.put
+            (resource, config.isEnabled () ? spec : AuthTypeSpec.NONE);
+      }
+   }
+
+   private static void mapExcludedResources
+      (final GeneralServerAuthConfig config,
+       final Map<String, AuthTypeSpec> resources)
+   {
+      for (final String excluded : config.getExcludedResources ()) {
+         resources.put (validateResource (excluded), AuthTypeSpec.NONE);
+      }
+   }
+
+   private static void mapRootResource
+      (final Map<String, AuthTypeSpec> resources)
+   {
+      if (resources.get (RESOURCE_ROOT) == null) {
+         resources.put (RESOURCE_ROOT, AuthTypeSpec.NONE);
+      }
+   }
+
+   private static void logMappedResources
+      (final Map<String, AuthTypeSpec> resources)
+   {
+      LOGGER.info ("Mapped resources:");
+
+      for (final Map.Entry<String, AuthTypeSpec> entry : resources.entrySet ())
+      {
+         final String resource = entry.getKey ();
+         final AuthTypeSpec spec = entry.getValue ();
+         LOGGER.info
+            ("     " + resource + " as " +
+             spec.getClass ().getSimpleName () + '.' + spec);
+      }
+   }
 
    /**
     * Finds a most specific resource, i.e. the most greater prefix in given

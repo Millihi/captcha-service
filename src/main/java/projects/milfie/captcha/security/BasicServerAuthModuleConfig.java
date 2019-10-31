@@ -45,9 +45,9 @@ public final class BasicServerAuthModuleConfig
    //  Private section                                                       //
    ////////////////////////////////////////////////////////////////////////////
 
-   private boolean  enabled;
-   private boolean  stateful;
-   private String[] resources;
+   private volatile boolean  enabled;
+   private volatile boolean  stateful;
+   private volatile String[] resources;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //

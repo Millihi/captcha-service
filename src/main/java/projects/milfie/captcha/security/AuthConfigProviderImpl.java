@@ -36,6 +36,7 @@ public final class AuthConfigProviderImpl
 
       this.moduleProvider = moduleProvider;
       this.properties = Collections.emptyMap ();
+      this.serverAuthConfig = null;
    }
 
    @Override
@@ -47,8 +48,58 @@ public final class AuthConfigProviderImpl
       return null;
    }
 
+   /**
+    * Takes care about concurency.
+    * {@inheritDoc}
+    */
    @Override
    public ServerAuthConfig getServerAuthConfig
+      (final String layer,
+       final String appContext,
+       final CallbackHandler handler)
+      throws AuthException
+   {
+      ServerAuthConfig config = serverAuthConfig;
+
+      if (config == null) {
+         synchronized (this) {
+            if (serverAuthConfig == null) {
+               serverAuthConfig =
+                  createServerAuthConfig (layer, appContext, handler);
+            }
+            config = serverAuthConfig;
+         }
+      }
+      return config;
+   }
+
+   /**
+    * Takes care about concurency.
+    * {@inheritDoc}
+    */
+   @Override
+   public synchronized void refresh () {
+      LOGGER.info ("Refresh of auth configs is started.");
+
+      moduleProvider.refresh ();
+
+      final ServerAuthConfig config = serverAuthConfig;
+
+      if (config != null) {
+         config.refresh ();
+      }
+   }
+
+   ////////////////////////////////////////////////////////////////////////////
+   //  Private section                                                       //
+   ////////////////////////////////////////////////////////////////////////////
+
+   private final AuthModuleProvider  moduleProvider;
+   private final Map<String, String> properties;
+
+   private volatile ServerAuthConfig serverAuthConfig;
+
+   private ServerAuthConfig createServerAuthConfig
       (final String layer,
        final String appContext,
        final CallbackHandler handler)
@@ -62,19 +113,6 @@ public final class AuthConfigProviderImpl
              moduleProvider,
              properties);
    }
-
-   @Override
-   public void refresh () {
-      LOGGER.info ("Refresh of auth configs is started.");
-      moduleProvider.refresh ();
-   }
-
-   ////////////////////////////////////////////////////////////////////////////
-   //  Private section                                                       //
-   ////////////////////////////////////////////////////////////////////////////
-
-   private final AuthModuleProvider  moduleProvider;
-   private final Map<String, String> properties;
 
    ////////////////////////////////////////////////////////////////////////////
    //  Private static section                                                //

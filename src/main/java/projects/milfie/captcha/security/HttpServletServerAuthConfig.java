@@ -43,6 +43,10 @@ abstract class HttpServletServerAuthConfig {
       this.category = category;
    }
 
+   public String getCategory () {
+      return category;
+   }
+
    public final void reset () {
       loadDefaults ();
    }

@@ -43,5 +43,5 @@ public class ConsumerSchedulerBean {
    ////////////////////////////////////////////////////////////////////////////
 
    private static final Logger LOG =
-      Logger.getLogger (ConsumerSchedulerBean.class.getSimpleName ());
+      Logger.getLogger (ConsumerSchedulerBean.class.getName ());
 }

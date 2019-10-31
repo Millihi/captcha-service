@@ -89,7 +89,7 @@ public class LocaleKeeperBean
    ////////////////////////////////////////////////////////////////////////////
 
    private static final Logger LOG =
-      Logger.getLogger (LocaleKeeperBean.class.getSimpleName ());
+      Logger.getLogger (LocaleKeeperBean.class.getName ());
 
    private static final long serialVersionUID = 201906202101L;
 
@@ -97,7 +97,7 @@ public class LocaleKeeperBean
       final FacesContext fctx = FacesContext.getCurrentInstance ();
 
       if (fctx == null) {
-         LOG.warning
+         LOG.info
             ("No faces instance found, return empty collection.");
          return Collections.emptyList ();
       }
@@ -105,7 +105,7 @@ public class LocaleKeeperBean
       final Application application = fctx.getApplication ();
 
       if (application == null) {
-         LOG.warning
+         LOG.info
             ("No application instance found, return empty collection.");
          return Collections.emptyList ();
       }
@@ -124,7 +124,7 @@ public class LocaleKeeperBean
       final FacesContext fctx = FacesContext.getCurrentInstance ();
 
       if (fctx == null) {
-         LOG.warning
+         LOG.info
             ("No faces instance found, fallback to system locale.");
          return Locale.getDefault ();
       }
@@ -132,7 +132,7 @@ public class LocaleKeeperBean
       final Application application = fctx.getApplication ();
 
       if (application == null) {
-         LOG.warning
+         LOG.info
             ("No application instance found, fallback to system locale.");
          return Locale.getDefault ();
       }
@@ -140,7 +140,7 @@ public class LocaleKeeperBean
       Locale defaultLocale = application.getDefaultLocale ();
 
       if (defaultLocale == null) {
-         LOG.warning
+         LOG.info
             ("No default locale specified in faces-config, " +
              "use system locale as default locale.");
          defaultLocale = Locale.getDefault ();
@@ -149,7 +149,7 @@ public class LocaleKeeperBean
       final ExternalContext ectx = fctx.getExternalContext ();
 
       if (ectx == null) {
-         LOG.warning
+         LOG.info
             ("No external context found, fallback to system locale.");
          return defaultLocale;
       }
@@ -177,12 +177,12 @@ public class LocaleKeeperBean
       }
 
       if (suitableLocale != null) {
-         LOG.warning
+         LOG.info
             ("No exact locale found, choose the most suitable locale.");
          return suitableLocale;
       }
 
-      LOG.warning
+      LOG.info
          ("No suitable locale found, fallback to default locale.");
       return defaultLocale;
    }

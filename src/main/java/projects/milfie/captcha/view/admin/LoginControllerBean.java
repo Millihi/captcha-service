@@ -84,8 +84,7 @@ public class LoginControllerBean
                catch (final Throwable thrown) {
                   LOG.log
                      (Level.WARNING,
-                      "An error oocured while send redirect:",
-                      thrown);
+                      "An error oocured while send redirect:", thrown);
                }
             }
          }
@@ -115,10 +114,8 @@ public class LoginControllerBean
          try {
             ((HttpServletRequest) ectx.getRequest ()).logout ();
          }
-         catch (final ServletException e) {
-            LOG.warning
-               ("An attempt to call the logout () failed with \"" +
-                e.getMessage () + "\".");
+         catch (final ServletException thrown) {
+            LOG.log (Level.WARNING, "An error occured while logout:", thrown);
          }
          ectx.invalidateSession ();
       }
@@ -144,7 +141,7 @@ public class LoginControllerBean
    ////////////////////////////////////////////////////////////////////////////
 
    private static final Logger LOG =
-      Logger.getLogger (LoginControllerBean.class.getSimpleName ());
+      Logger.getLogger (LoginControllerBean.class.getName ());
 
    private static final long serialVersionUID = 201905280604L;
 

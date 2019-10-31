@@ -76,7 +76,7 @@ public abstract class AbstractUTF8MessageBundle
    protected static final Control UTF8_CONTROL = new UTF8Control ();
 
    private static final Logger LOG =
-      Logger.getLogger (AbstractUTF8MessageBundle.class.getSimpleName ());
+      Logger.getLogger (AbstractUTF8MessageBundle.class.getName ());
 
    protected static class UTF8Control
       extends Control
